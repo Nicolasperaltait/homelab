@@ -1,129 +1,106 @@
-# 01 — Executive Summary
+# 01 - Executive Summary
 
-## Purpose
+## Objective
 
-This document explains the homelab at the highest useful level:
+This document summarizes the homelab from an executive and technical perspective. The public version is designed to show architecture, operations, security and recovery judgment without exposing sensitive implementation details.
 
-- what it is
-- what problems it is meant to solve
-- what technical skills it demonstrates
-- what its current maturity level is
+## Overview
 
----
+The homelab was designed as a practical environment for infrastructure, cybersecurity and daily operations. The goal is not to accumulate services, but to demonstrate the ability to:
 
-## What this homelab is
+- design a segmented architecture
+- operate services with discipline
+- reduce unnecessary exposure
+- centralize internal resolution
+- observe the environment with useful dashboards
+- back up and recover critical components
+- document decisions, incidents and limits
 
-This is a **segmented infrastructure and security lab** built to simulate a small but realistic environment for:
+## Public / private split
 
-- infrastructure administration
-- network segmentation
-- service isolation
-- security monitoring
-- observability
-- backup and recovery
-- disciplined operations
-
-It is not meant to imitate enterprise complexity for its own sake.  
-It is meant to demonstrate **good technical judgment**.
-
----
-
-## Core design idea
-
-The lab is built around a virtualization host that acts as:
-
-- compute platform
-- internal gateway
-- segmentation control point
-
-Around that core, services are separated by role:
-
-| Zone | Purpose | Typical workloads |
-|---|---|---|
-| Management / LAN | administration and local access | workstation, DNS, NAS, hypervisor access |
-| Applications | internal services platform | containers, reverse proxy, dashboards |
-| Security | detection and visibility | SIEM, agents, security dashboards |
-| VPN | remote entry model | remote access service |
-
----
-
-## What the project demonstrates
-
-### Infrastructure
-- virtualization design
-- host and service dependency mapping
-- controlled service publication
-- storage-aware operations
-
-### Networking
-- logical segmentation
-- gateway-based inter-zone control
-- internal DNS strategy
-- role-based connectivity model
-
-### Security
-- least privilege thinking
-- host-role-aware hardening
-- centralized security monitoring
-- sanitization discipline for public documentation
-
-### Operations
-- repeatable runbook structure
-- incident-first troubleshooting order
-- baseline-driven rollback thinking
-- backup validation instead of blind trust
-
-### Recovery
-- distinction between snapshots and backups
-- application-level vs VM-level recovery
-- encrypted offsite strategy
-- restore maturity tracking
-
----
-
-## Current maturity assessment
-
-| Area | Current posture |
+| Layer | Purpose |
 |---|---|
-| Architecture | stable and explainable |
-| Segmentation | implemented |
-| Security baseline | functional, with role-based refinement ongoing |
-| Monitoring | operational |
-| Backups | operational and validated at workflow level |
-| Restore testing | still the most important open item |
-| Documentation | now intentionally simplified for public use |
+| Private documentation | real operations, evidence, incidents, paths, scripts, errors and critical data |
+| Public repository | sanitized version for technical explanation and architecture review |
 
----
+Real operational information is not copied directly into the public repository. It is transformed first into patterns, decisions and lessons without identifiable details.
 
-## What changed in the public version
+## What this project demonstrates
 
-The original public repository structure was broad and technically correct, but it was harder to explain quickly.
+| Capability | How it appears in the repo |
+|---|---|
+| Architecture | zones, dependencies and controlled publication |
+| Operations | runbook, periodic checks and scenario-based troubleshooting |
+| Security | least privilege, private admin surfaces and role-aware hardening |
+| Observability | separation between operational metrics and security visibility |
+| Continuity | backup model, offsite strategy and recovery as a maturity milestone |
+| Technical communication | clear, sanitized and defensible documentation |
 
-This version improves that by making the repo:
+## Main components
 
-- easier to navigate
-- easier to defend in an interview
-- easier to maintain over time
-- easier to keep sanitized
+| Layer | Function |
+|---|---|
+| Hypervisor | virtualization, transit between segments and central control point |
+| Internal DNS | centralized resolution and consistent access |
+| Application platform | host for internal services |
+| Security | SIEM and event telemetry |
+| Monitoring | metrics, dashboards and operational visibility |
+| Storage | data repository and backup target |
+| Remote access | secure access design under a VPN model |
 
----
+## Current state
 
-## One-paragraph project pitch
+### Solved
 
-> This homelab is a hypervisor-based segmented environment designed to practice infrastructure architecture, security operations, observability, backup discipline, and technical troubleshooting. The public repo is sanitized, but it keeps the actual design logic, operating model, recovery strategy, and decision-making process visible.
+- logical segmentation by zones
+- centralized internal DNS
+- operational application platform
+- baseline observability
+- documented backup strategy and offsite recovery model
+- operational dashboard approach
+- public documentation separated from private documentation
 
----
+### Maturing
 
-## Suggested interview narrative
+- formal restore tests
+- more actionable operational alerts
+- SIEM evidence for critical backup events
+- DNS redundancy
+- remote access improvements under connectivity constraints
+- role-aware hardening v2
 
-Use this sequence:
+## Simplified logical topology
 
-1. Show the executive summary.
-2. Show the architecture diagram.
-3. Show the runbook.
-4. Show the backup and recovery model.
-5. Close with roadmap and open risks.
+```mermaid
+flowchart LR
+    A[Operations Workstation] --> B[Internal DNS]
+    A --> C[Hypervisor]
+    C --> D[Services Zone]
+    C --> E[Security Zone]
+    C --> F[VPN Zone]
+    C --> G[Storage / NAS]
 
-That sequence tells a coherent story:
+    D --> H[Internal Applications]
+    D --> I[Reverse Proxy]
+    D --> J[Monitoring]
 
-**design → controls → operations → recovery → next steps**
+    E --> K[SIEM]
+    F --> L[Secure Remote Access]
+```
+
+## Canonical project state
+
+| Area | Status |
+|---|---|
+| Architecture | stable and documented |
+| Baseline security | applied with a role-aware approach |
+| Observability | functional and improving |
+| Backups | operational and documented |
+| Recovery | partially demonstrated; formal restore test pending |
+| Public documentation | sanitized and technically defensible |
+
+## Correct reading
+
+This homelab is not trying to look enterprise through decoration. It is trying to show something more serious:
+
+> a small, reasoned, operable and explainable infrastructure.

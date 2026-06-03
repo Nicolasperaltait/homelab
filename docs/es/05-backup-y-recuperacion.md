@@ -1,27 +1,30 @@
-# 05 · Backup y Recuperación
+# 05 - Backup y Recuperacion
 
-## Propósito
+## Proposito
 
-Describir la estrategia pública de backup y recuperación del homelab.
+Describir la estrategia publica de backup y recuperacion del homelab.
 
 ## Principios
 
-- recuperar vale más que “tener una copia”
+- recuperar vale mas que tener una copia
 - snapshot y backup no son lo mismo
 - offsite sin capacidad real de restore no alcanza
-- la validación periódica es parte del diseño
+- la validacion periodica es parte del diseno
+- una ventana de backup debe representar una respuesta operativa clara
+- la configuracion necesaria para descifrar o restaurar tambien es critica
 
 ## Capas del modelo de backup
 
-| Capa | Qué cubre |
+| Capa | Que cubre |
 |---|---|
 | Infraestructura | VMs, discos y rollback de plataforma |
-| Aplicación | datos críticos de servicios |
+| Aplicacion | datos criticos de servicios |
 | Storage local | repositorio operativo de backup |
-| Archivo empaquetado | consolidación por dominio |
-| Offsite cifrado | copia externa para escenarios de pérdida mayor |
+| Archivo empaquetado | consolidacion por dominio |
+| Offsite cifrado | copia externa para escenarios de perdida mayor |
+| Evidencia | logs, estado, alertas y validaciones |
 
-## Flujo lógico
+## Flujo logico
 
 ```mermaid
 flowchart LR
@@ -29,81 +32,107 @@ flowchart LR
     B --> C[Storage]
     C --> D[Archivo empaquetado]
     D --> E[Offsite cifrado]
+    D --> F[Validacion]
+    F --> G[Evento / evidencia]
 ```
 
-## Qué se busca proteger
+## Ventana operativa de backups
 
-- estado de máquinas virtuales
-- datos de servicios críticos
-- configuraciones necesarias para recuperación
-- continuidad operativa mínima
+El diseno publico no documenta horarios reales. El criterio operativo es:
+
+- ejecutar backups criticos en una ventana de baja actividad
+- separar backups pequenos y pesados para mejorar visibilidad
+- refrescar metricas despues de que la ventana deberia haber terminado
+- responder a la pregunta: puedo operar hoy con confianza?
+
+## Que se busca proteger
+
+- estado de maquinas virtuales
+- datos de servicios criticos
+- configuraciones necesarias para recuperacion
+- continuidad operativa minima
 - capacidad de volver a un punto conocido bueno
+- evidencia de que el backup no solo existio, sino que fue validado
 
-## Distinción clave
+## Distincion clave
 
 | Concepto | Uso correcto |
 |---|---|
-| Snapshot | rollback rápido, cambios puntuales |
-| Backup | recuperación portable y más robusta |
-| Offsite | resiliencia ante pérdida local |
-| Restore test | evidencia de que la recuperación es real |
+| Snapshot | rollback rapido, cambios puntuales |
+| Backup | recuperacion portable y mas robusta |
+| Offsite | resiliencia ante perdida local |
+| Restore test | evidencia de que la recuperacion es real |
+| Alerta | senal accionable, no reemplazo de validacion |
 
-## Escenarios de recuperación
+## Offsite cifrado
 
-### Escenario A · Falla de servicio
+La copia externa se trata como un control de resiliencia, no como almacenamiento cualquiera.
 
-- revisar logs
-- validar datos
+Principios publicos:
+
+- el contenido offsite debe estar cifrado
+- las claves/configuracion de recuperacion son material critico
+- no se publican nombres de remotos, rutas reales ni configuraciones completas
+- se valida presencia offsite, pero eso no reemplaza restore test
+
+## Escenarios de recuperacion
+
+### Escenario A - Falla de servicio
+
+- preservar evidencia si corresponde
+- validar dependencia de red, DNS y storage
 - recuperar desde copia por dominio si corresponde
-- confirmar que la aplicación vuelve en estado sano
+- confirmar que la aplicacion vuelve en estado sano
 
-### Escenario B · Falla de VM
+### Escenario B - Falla de VM
 
-- evaluar rollback rápido
+- evaluar rollback rapido
 - restaurar VM desde backup cuando corresponda
 - validar red, arranque y reachability
 
-### Escenario C · Pérdida parcial de storage
+### Escenario C - Perdida parcial de storage
 
 - aislar impacto
 - recuperar desde archivo local o copia externa
-- reconstruir el flujo operativo mínimo
+- reconstruir el flujo operativo minimo
 
-### Escenario D · Pérdida amplia del entorno
+### Escenario D - Perdida amplia del entorno
 
 - reinstalar plataforma base
 - restaurar componentes prioritarios
 - reconstruir conectividad y DNS
-- recuperar servicios críticos según prioridad
+- recuperar servicios criticos segun prioridad
 
-## Prioridad de recuperación
+## Prioridad de recuperacion
 
 | Prioridad | Componente |
 |---|---|
 | Alta | hypervisor, DNS interno, storage, plataforma de apps |
-| Media | observabilidad y dashboard |
+| Alta | datos y configuracion de servicios criticos |
+| Media | observabilidad y dashboards |
 | Variable | servicios auxiliares o de laboratorio |
 
-## Riesgos todavía abiertos
+## Riesgos todavia abiertos
 
 | Riesgo | Estado |
 |---|---|
 | restore test formal | pendiente |
-| cifrado local integral | parcialmente pendiente |
-| redundancia física de storage | pendiente de evolución |
-| validación automática más fuerte | mejora futura |
+| validacion automatica mas fuerte | mejora futura |
+| redundancia fisica de storage | pendiente de evolucion |
+| alertas y evidencia SIEM | en maduracion |
+| dependencia de configuracion critica para offsite | controlada en documentacion privada |
 
 ## Indicadores operativos deseados
 
 - backup reciente visible
 - archivo reciente legible
 - copia externa reciente
-- logs sin error crítico
-- restore test periódico documentado
+- logs sin error critico
+- evento de estado entendible
+- restore test periodico documentado
 
 ## Idea central
 
-Este diseño no vende “backups bonitos”.  
-Vende algo mejor:
+Este diseno se enfoca en el resultado que importa:
 
-> conciencia de recuperación y continuidad.
+> conciencia de recuperacion y continuidad.

@@ -96,15 +96,15 @@ Criterio general:
 - servicios internos preferentemente por FQDN
 - exposición externa evitada salvo diseño explícito
 
-## Convención de nombres
+## Convencion de nombres
 
 Modelo objetivo:
 
-- `[dominio interno sanitizado]` para base interna
-- `[dominio interno sanitizado]` para apps
-- `[dominio interno sanitizado]` para seguridad
+- nombres internos por rol
+- prefijos o dominios separados por zona
+- alias entendibles para servicios criticos
 
-En el repositorio público, los ejemplos son ilustrativos y no equivalen al naming real del entorno.
+En el repositorio publico no se publica el naming real del entorno.
 
 ## Lectura profesional de la arquitectura
 

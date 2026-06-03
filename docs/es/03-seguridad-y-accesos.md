@@ -1,38 +1,42 @@
-# 03 · Seguridad y Accesos
+# 03 - Seguridad y Accesos
 
-## Propósito
+## Proposito
 
 Documentar el enfoque de seguridad del homelab sin exponer detalles sensibles.
 
 ## Modelo de seguridad
 
-El entorno sigue un modelo pequeño pero explícito:
+El entorno sigue un modelo pequeno pero explicito:
 
-- segmentación por rol
-- mínimo privilegio
-- reducción de lateralidad
-- administración no expuesta públicamente
-- acceso remoto detrás de VPN
+- segmentacion por rol
+- minimo privilegio
+- reduccion de lateralidad
+- administracion no expuesta publicamente
+- acceso remoto bajo patron VPN
 - excepciones documentadas cuando un flujo entre zonas es necesario
+- separacion entre documentacion privada y documentacion publica
 
 ## Principios aplicados
 
-| Principio | Aplicación |
+| Principio | Aplicacion |
 |---|---|
-| Mínimo privilegio | accesos administrativos controlados |
-| Segmentación | separación de zonas con propósito |
-| Seguridad por diseño | servicios críticos no expuestos |
+| Minimo privilegio | accesos administrativos controlados |
+| Segmentacion | separacion de zonas con proposito |
+| Seguridad por diseno | servicios criticos no expuestos |
 | Excepciones documentadas | flujos permitidos solo por necesidad funcional |
 | Hardening por rol | no todos los hosts reciben el mismo tratamiento |
+| Sanitizacion publica | publicar intencion y criterio, no implementacion sensible |
 
-## Qué no se publica en este repo
+## Que no se publica
 
 - claves privadas
 - secretos
 - tokens
 - credenciales
-- endpoints reales de administración
-- configuración completa de VPN
+- endpoints reales de administracion
+- configuracion completa de VPN
+- rutas internas de backups o logs
+- configuraciones completas de firewall, SIEM o monitoreo
 - detalles sensibles del sistema de backup offsite
 
 ## Accesos
@@ -41,58 +45,71 @@ El entorno sigue un modelo pequeño pero explícito:
 
 - acceso directo solo desde origen autorizado
 - prioridad a SSH y paneles internos bajo control
-- sin publicación directa a Internet de interfaces administrativas
+- sin publicacion directa a Internet de interfaces administrativas
 
 ### Acceso de aplicaciones
 
-- preferencia por FQDN interno
+- preferencia por nombres internos
 - reverse proxy para servicios web seleccionados
-- puertos directos solo cuando existe justificación operativa
+- puertos directos solo cuando existe justificacion operativa
 
 ### Acceso remoto
 
 - modelo basado en VPN
-- publicación externa solo bajo diseño controlado
-- consideración explícita de restricciones de conectividad y CGNAT
+- publicacion externa solo bajo diseno controlado
+- consideracion explicita de restricciones de conectividad y upstream networking
 
 ## Hardening por rol
 
-Una lección importante del proyecto es que **un hardening genérico no sirve para todos los hosts**.
+Una leccion importante del proyecto es que un hardening generico no sirve para todos los hosts.
 
 | Tipo de host | Enfoque recomendado |
 |---|---|
-| DNS interno | permitir puertos funcionales de resolución y administración mínima |
-| NAS / storage | proteger SMB y acceso web según origen |
+| DNS interno | permitir puertos funcionales de resolucion y administracion minima |
+| NAS / storage | proteger shares y paneles segun origen |
 | SIEM | exponer solo puertos requeridos para dashboard y agentes |
-| [host de contenedores] | tratamiento especial por interacción con networking y proxy |
-| Hypervisor | control fino de firewall, forwarding y tránsito |
+| [host de contenedores] | tratamiento especial por networking, bridge y proxy |
+| Hypervisor | control fino de firewall, forwarding y transito |
 
-## Flujos legítimos entre zonas
+## Flujos legitimos entre zonas
 
-Hay casos donde una zona debe hablar con otra.  
-Eso no contradice la segmentación; la vuelve realista.
+Hay casos donde una zona debe hablar con otra. Eso no contradice la segmentacion; la vuelve realista.
 
 Criterio:
 
 - permitir solo el flujo necesario
-- documentar por qué existe
+- documentar por que existe
 - validar impacto operativo
-- revisarlo periódicamente
+- revisarlo periodicamente
+- no publicar reglas reales ni origen/destino exactos
+
+## Seguridad como evidencia operativa
+
+El SIEM no se usa solo como herramienta de visualizacion. Su rol esperado es registrar eventos relevantes para operacion y seguridad, por ejemplo:
+
+- fallos de backup
+- cambios en componentes criticos
+- agentes desconectados
+- eventos de autenticacion relevantes
+- alertas que requieren accion humana
+
+En la version publica se describe el patron, no las reglas reales ni eventos crudos.
 
 ## Riesgos conocidos
 
-| Riesgo | Mitigación actual | Pendiente |
+| Riesgo | Mitigacion actual | Pendiente |
 |---|---|---|
-| Punto único de falla DNS | DNS interno central | redundancia DNS |
-| Acceso remoto limitado por conectividad | diseño VPN local | relay / VPS o mejora de salida |
-| Recuperación no completamente demostrada | backups y DRP documentados | restore test real |
-| Complejidad creciente | runbook y documentación | revisión continua de alcance |
+| Punto unico de falla DNS | DNS interno central | redundancia DNS |
+| Acceso remoto limitado por conectividad | diseno VPN local | relay o mejora de salida |
+| Recuperacion no completamente demostrada | backups y DRP documentados | restore test real |
+| Alertas con demasiado ruido | criterio de alertas accionables | refinamiento continuo |
+| Complejidad creciente | runbook y documentacion | revision continua de alcance |
 
 ## Threat model lite
 
 ```mermaid
 flowchart TD
-    A[Internet] -->|No acceso admin directo| B[Servicios expuestos por diseño]
+    A[Internet] -->|No acceso admin directo| B[Servicios expuestos por diseno]
     C[Cliente interno] --> D[DNS interno]
     C --> E[Aplicaciones internas]
     C --> F[Paneles administrativos autorizados]
@@ -102,11 +119,11 @@ flowchart TD
 
 ## Idea central
 
-La seguridad de este homelab no se apoya en una sola herramienta.  
-Se apoya en una combinación de:
+La seguridad de este homelab no se apoya en una sola herramienta. Se apoya en una combinacion de:
 
-- segmentación
-- publicación controlada
-- endurecimiento según rol
-- operación disciplinada
-- documentación clara
+- segmentacion
+- publicacion controlada
+- endurecimiento segun rol
+- operacion disciplinada
+- observabilidad de seguridad
+- documentacion clara y segura
