@@ -37,12 +37,12 @@ flowchart LR
 
 ## Sanitized zone model
 
-| Zone | Example sanitized range | Purpose |
+| Zone | Public description | Purpose |
 |---|---|---|
-| Management / LAN | 192.168.10.0/24 | local admin access, DNS, NAS, hypervisor management |
-| Applications | 10.20.10.0/24 | internal applications and reverse proxy |
-| Security | 10.20.30.0/24 | SIEM and security telemetry |
-| VPN | 10.20.40.0/24 | remote access entry model |
+| Management / LAN | management zone | local admin access, DNS, NAS, hypervisor management |
+| Applications | application zone | internal applications and reverse proxy |
+| Security | security zone | SIEM and security telemetry |
+| VPN | remote access zone | remote access entry model |
 
 ---
 
@@ -140,7 +140,7 @@ The environment is intentionally limited so that each layer remains:
 
 - clean role separation
 - low ambiguity in service purpose
-- strong fit for portfolio explanation
+- strong fit for public technical explanation
 - practical rather than decorative complexity
 - room to grow without redesigning from scratch
 

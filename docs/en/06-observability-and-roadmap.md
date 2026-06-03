@@ -1,164 +1,132 @@
-# 06 — Observability and Roadmap
+# 06 - Observability and Roadmap
 
-## Observability goal
+## Purpose
 
-Monitoring exists to answer three practical questions:
+Explain how the environment is observed and where it is evolving.
 
-1. is the platform healthy?
-2. is the service path healthy?
-3. is the security posture observable?
+## Conceptual separation
 
-If it cannot answer those, it is decoration.
+This homelab separates three layers that are often mixed together:
 
----
-
-## Observability model
-
-The lab deliberately separates:
-
-- **infrastructure observability**
-- **security visibility**
-
-That distinction matters.
-
-| Discipline | Purpose |
+| Layer | Purpose |
 |---|---|
-| Infrastructure observability | resource usage, service health, reachability, trend visibility |
-| Security visibility | telemetry, events, suspicious behavior, host-level signal collection |
+| Infrastructure observability | health, resources, availability, performance |
+| Security visibility | events, agents, telemetry, investigation |
+| Operational evidence | proof that backups, alerts and controls worked |
 
----
-
-## Public-safe monitoring stack view
+## Logical stack
 
 ```mermaid
 flowchart LR
-    H[Hypervisor and Hosts] --> P[Metrics Collection]
-    A[Applications and Services] --> P
-    P --> G[Dashboards]
-
-    H --> W[Security Telemetry]
-    A --> W
-    W --> S[Security Monitoring]
+    A[Hosts and services] --> B[Metrics]
+    A --> C[Events]
+    B --> D[Dashboards]
+    C --> E[SIEM]
+    D --> F[Operational visibility]
+    E --> G[Security visibility]
+    C --> H[Operational evidence]
 ```
 
----
+## What observability should answer
 
-## What should be visible
+- what is down
+- what is degraded
+- what changed
+- which service is consuming more resources
+- which critical dependency stopped responding
+- which incident requires immediate attention
+- which backup or offsite copy failed or missed its window
 
-### Platform health
-- host availability
-- VM availability
-- CPU and memory trends
+## Real value
+
+Observability is not here to decorate dashboards. It is here to improve operations and speed up diagnosis.
+
+## Operational dashboards
+
+Dashboards are designed to answer concrete questions:
+
+- general environment health
+- availability of core services
+- backup and offsite state
 - storage pressure
-- backup destination pressure
+- signals relevant for a NOC-style or operations view
 
-### Service health
-- internal service reachability
-- reverse proxy health
-- dashboard/service responsiveness
-- backup workflow recency
+Public rule:
 
-### Security health
-- host telemetry ingestion
-- security monitoring availability
-- enrollment/agent stability
-- major control-plane anomalies
+- do not publish real dashboard JSON when it contains paths, hosts or sensitive queries
+- document purpose and design criteria
+- keep private before/after JSON backups for real dashboard changes
 
----
+## SIEM as evidence
 
-## Current maturity
+The SIEM is used as a security and operational evidence layer. Public use examples:
 
-| Area | Status |
-|---|---|
-| basic metrics | operational |
-| dashboards | operational |
-| security monitoring base | operational |
-| useful alerting | still being refined |
-| recovery observability | still incomplete until restore tests are documented |
+- raise backup failures as high-severity alerts
+- detect disconnected agents
+- retain relevant events for technical audit
+- separate tactical alerting from historical evidence
 
----
+The public version does not include real rules, IDs, paths, JSON events or agent names.
 
-## Why alerting is not “done” yet
+## Current state
 
-Good alerting is selective.
+### Solved
 
-Bad alerting creates:
+- baseline metrics
+- infrastructure dashboards
+- initial security visibility
+- distinction between monitoring and security
+- public documentation of the approach
+- separation between private and public documentation
 
-- noise
-- desensitization
-- fake confidence
-- blind spots hidden in spam
+### Maturing
 
-A mature alerting model should focus on:
+- more actionable alerts
+- more executive dashboards
+- finer storage and network monitoring
+- better integration of critical events
+- restore tests as recovery evidence
 
-- real failures
-- degraded states
-- missed backup windows
-- storage pressure
-- control-plane issues
+## Prioritized roadmap
 
----
+```mermaid
+flowchart TD
+    A[Real restore test] --> B[Operational alerts]
+    B --> C[SIEM as evidence]
+    C --> D[DNS redundancy]
+    D --> E[More robust remote access]
+    E --> F[Role-aware hardening v2]
+    F --> G[Better storage resilience]
+```
 
-## Public roadmap
-
-### Near-term
-- formalize a cleaner public repository structure
-- improve documentation consistency
-- keep the public version easy to explain
-
-### Short-term technical priorities
-- restore testing and documentation
-- alerting refinement
-- DNS redundancy
-- clearer remote access architecture
-
-### Medium-term priorities
-- role-aware hardening v2
-- improved storage resilience
-- stronger visibility for networking and backup confidence
-- more explicit dependency documentation
-
----
-
-## Roadmap board
+## Ordered backlog
 
 | Priority | Item | Why it matters |
 |---|---|---|
-| Critical | restore test | proves recovery |
-| Critical | alert routing maturity | improves real operations |
+| Critical | restore test | closes the gap between backup and recovery |
+| High | operational alerts | reduces time to react |
+| High | SIEM evidence for backups | proves failures and status with traceability |
 | High | DNS redundancy | reduces a central dependency risk |
-| High | remote access architecture refinement | improves resilience and explainability |
-| High | role-based hardening v2 | aligns controls to service function |
-| Medium | storage resilience improvements | supports backup durability |
-| Medium | richer backup validation reporting | improves confidence |
-| Medium | more formal interview-friendly diagrams | improves presentation quality |
+| High | remote access refinement | addresses connectivity limitations |
+| Medium | role-aware hardening v2 | matures controls without breaking operations |
+| Medium | storage improvements | resilience and capacity |
+| Medium | more executive dashboards | faster operational reading |
 
----
+## Correct roadmap reading
 
-## How to present this in an interview
+The next step is not adding more things. It is closing what already matters:
 
-Use this sequence:
+- recover
+- alert
+- evidence
+- tolerate failures better
+- operate with more confidence
 
-1. “Here is the architecture.”
-2. “Here is how it is secured.”
-3. “Here is how I operate it.”
-4. “Here is how I think about backup and restore.”
-5. “Here is what is still open and why.”
+## Conclusion
 
-That last step matters.  
-A professional project does not pretend to be finished.  
-It shows **judgment about what still matters**.
+Observability and roadmap maturity are shown by making clear:
 
----
-
-## Final takeaway
-
-This homelab is strongest when presented as:
-
-- deliberate
-- segmented
-- monitored
-- recoverable in design
-- honest about remaining gaps
-
-That is more credible than a louder repo with less control.
+- what already works
+- what is still fragile
+- what is prioritized
+- why

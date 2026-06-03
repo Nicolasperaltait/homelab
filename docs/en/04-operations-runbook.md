@@ -1,225 +1,150 @@
-# 04 — Operations Runbook
+# 04 - Operations Runbook
 
 ## Purpose
 
-This document answers a simple operational question:
+This public runbook summarizes how the homelab is operated without exposing sensitive details. It does not replace the full private documentation. It is the presentable and defensible version.
 
-> If something stops working, what do I check first, in what order, and how do I avoid making it worse?
+## Runbook goals
 
-That is the real value of a runbook.
+- review general state
+- diagnose incidents without improvising
+- validate basic operational capability
+- reduce dependence on informal memory
+- structure response to failures
+- keep real operations separate from the public version
 
----
+## Diagnostic order
 
-## Operational priorities
+```mermaid
+flowchart LR
+    A[Power / Host] --> B[Basic Network]
+    B --> C[Internal DNS]
+    C --> D[Specific Service]
+    D --> E[Application / Data]
+    E --> F[Backup / Recovery if needed]
+```
 
-Use this order during troubleshooting:
+## Daily checklist
 
-1. hypervisor / host state
-2. network reachability
-3. DNS resolution
-4. service status
-5. data path / storage path
-6. backup or recovery path
-
-This order prevents random restarts and guesswork.
-
----
-
-## Daily checks
-
-| Check | Expected result |
+| Control | Expected result |
 |---|---|
-| Hypervisor reachable | yes |
-| Internal DNS responding | yes |
-| Storage/NAS healthy | yes |
-| App platform healthy | yes |
-| Security monitoring reachable | yes |
-| Latest backup artifacts present | yes |
+| Hypervisor reachable | operational |
+| Internal DNS resolving | correct |
+| Application platform up | correct |
+| Storage reachable | correct |
+| SIEM / monitoring responding | correct |
+| Latest backup status | validated in private evidence |
+| Offsite copy status | tracked when enabled |
+| Critical alerts | reviewed |
 
-### Daily checklist
-- [ ] verify hypervisor access
-- [ ] verify internal DNS
-- [ ] verify storage availability
-- [ ] verify app platform containers/services
-- [ ] verify security monitoring availability
-- [ ] verify recent backup presence
+## Weekly checklist
 
----
-
-## Weekly checks
-
-| Check | Why it matters |
+| Control | Expected result |
 |---|---|
-| storage capacity | backup failures usually arrive late, not politely |
-| archive growth | retention drift is operational debt |
-| last successful backup window | confirms jobs are not silently stale |
-| last readable archive | checks artifact integrity at a practical level |
-| snapshot / restore posture | confirms recovery options still exist |
+| storage space | sufficient |
+| backup growth | under control |
+| operational cleanup | executed |
+| recent archive | readable |
+| general service state | stable |
+| critical backlog | reviewed |
+| private documentation | evidence updated |
+| public documentation | no sensitive data |
 
-### Weekly checklist
-- [ ] review storage utilization
-- [ ] confirm backup windows completed
-- [ ] confirm latest archive is readable
-- [ ] review logs for repeated warning patterns
-- [ ] review top operational risks
+## Common operational scenarios
 
----
+### 1. A web service does not respond
 
-## First 10 minutes of an incident
+Validate in this order:
 
-### Step 1 — define the symptom
-Write down:
-
-- what is failing
-- from where it is failing
-- whether it fails by name, by IP, or both
-- whether the issue affects one service or many
-
-### Step 2 — define the scope
-Classify the issue:
-
-- one service
-- one VM
-- one zone
-- multiple zones
-- whole environment
-
-### Step 3 — verify the platform
-Check:
-
-- hypervisor health
-- VM state
-- internal routing/gateway behavior
-
-### Step 4 — verify DNS
-If IP works but name fails, treat it as DNS first.
-
-### Step 5 — verify storage if the symptom involves backups, NAS, archives, or application data
-
-### Step 6 — avoid mass restarts
-Do not restart everything because “something feels weird.”
-
-That is how small incidents become archaeology.
-
----
-
-## Typical failure scenarios
-
-## Scenario A — Web service unavailable
-
-### Check order
 1. name resolution
-2. IP reachability
-3. VM state
-4. reverse proxy path
-5. application/container state
+2. network reachability
+3. VM or container state
+4. proxy or publication path
+5. service logs
+6. storage or DNS dependency
 
-### Likely root causes
-- DNS issue
-- proxy routing issue
-- service process failure
-- VM unavailable
-- network path broken
+### 2. Internal DNS failure
 
----
+Validate:
 
-## Scenario B — No outbound connectivity from a VM or service
+1. DNS service state
+2. listening ports
+3. client DNS configuration
+4. name resolution from a trusted source
+5. impact on dependent services
 
-### Check order
-1. gateway presence
-2. hypervisor forwarding/routing logic
-3. DNS vs pure connectivity distinction
-4. service-level retry behavior
+### 3. Connectivity between zones fails
 
-### Likely root causes
-- routing issue
-- NAT/forwarding issue
-- DNS failure misread as connectivity loss
+Validate:
 
----
+1. zone gateway
+2. forwarding
+3. NAT
+4. allowed cross-zone rules
+5. DNS problem versus transit problem
 
-## Scenario C — Internal DNS failure
+### 4. Storage full or backups failing
 
-### Symptoms
-- internal names fail
-- IP access still works
-- multiple “apps” appear down at once
+Validate:
 
-### Interpretation
-This is often a DNS event, not a multi-service outage.
+1. free space
+2. growth by backup domain
+3. staging or old leftovers
+4. retention policy
+5. integrity of the last known good backup
+6. offsite copy status
 
----
+### 5. Dashboard or monitoring degraded
 
-## Scenario D — Backup failure or missing artifact
+Validate:
 
-### Check order
-1. source data path
-2. staging or transfer path
-3. archive creation
-4. offsite path
-5. retention or capacity issue
+1. metric source
+2. collector/exporter
+3. scrape or ingestion
+4. dashboard and query
+5. whether the data reflects real operations or missing telemetry
 
-### Operational reminder
-A job timer firing is not proof of a good backup.
+## Quick decision matrix
 
----
-
-## Scenario E — Storage pressure
-
-### Signs
-- backup jobs fail unexpectedly
-- archives stop rotating cleanly
-- staging accumulates
-- services report write or upload errors
-
-### Response
-- measure first
-- identify largest consumers
-- preserve latest healthy recovery point
-- clean with intent, not panic
-
----
-
-## Rollback vs restore
-
-| Option | Use when |
+| Symptom | First suspicion |
 |---|---|
-| rollback / snapshot return | a recent change clearly caused the issue |
-| VM-level restore | host/VM state is badly degraded |
-| app/data restore | service state is damaged but platform is usable |
+| network access works, name access fails | DNS |
+| several services fail together | hypervisor or network |
+| backup runs but content is inconsistent | pipeline, staging or validation |
+| remote access is partial | VPN, routes or NAT |
+| web service fails but VM responds | proxy or application |
+| dashboard is red while service is healthy | metric, exporter or query |
 
----
+## Minimum controls by component
 
-## Public-safe command categories
+| Component | What to validate |
+|---|---|
+| Hypervisor | VMs, network, storage, transit |
+| Internal DNS | service, resolution, ports |
+| Application platform | containers, proxy, resources |
+| Storage | space, shares, backup directories |
+| SIEM | main services, agents and ingestion |
+| VPN | interface, handshake, expected reachability |
+| Dashboards | real data, freshness and usefulness |
 
-This public runbook avoids embedding environment-specific secrets.  
-Instead, it recommends categories of checks:
+## Rollback and recovery
 
-- VM state checks
-- service status checks
-- DNS checks
-- routing checks
-- storage capacity checks
-- archive listing and validation checks
+When to consider rollback:
 
-Detailed implementation commands may remain in private notes if they contain sensitive identifiers.
+- the recent change is clearly the source of the issue
+- hot-fixing increases risk
+- a trustworthy snapshot or backup exists
+- reverting is safer than continuing to change things
 
----
+## Operational lessons incorporated
 
-## What makes this runbook useful
+- snapshot is not backup
+- generated backup is not trustworthy backup
+- executed schedule is not validation
+- green dashboard is not recoverability
+- if it is not validated, it does not exist
+- diagnostic order matters
 
-A good runbook is not a command dump.
+## What this runbook demonstrates
 
-It should:
-
-- reduce panic
-- reduce guesswork
-- improve triage order
-- make recovery decisions easier
-- preserve operator confidence
-
----
-
-## Summary
-
-This runbook exists to prove that the lab is **operated**, not just assembled.
+The environment was not just installed. It was designed to be operated, observed and recovered with judgment.

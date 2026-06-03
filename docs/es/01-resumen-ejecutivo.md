@@ -1,76 +1,79 @@
-# 01 · Resumen Ejecutivo
+# 01 - Resumen Ejecutivo
 
 ## Objetivo
 
-Este documento resume el homelab de forma ejecutiva y técnica.  
-Está pensado para que cualquier persona pueda entender:
+Este documento resume un homelab de forma ejecutiva y tecnica. La version publica busca mostrar criterio de arquitectura, operacion, seguridad y recuperacion sin exponer datos sensibles.
 
-- qué problema resuelve
-- cómo está organizado
-- qué capacidades demuestra
-- cuál es su estado actual
+## Vision general
 
-## Visión general
+El homelab fue disenado como un entorno de practica para infraestructura, ciberseguridad y operacion diaria. La meta no es acumular servicios, sino demostrar capacidad para:
 
-Este homelab fue diseñado como un entorno de práctica para infraestructura, seguridad y operación.  
-La meta no es “tener muchos servicios”, sino demostrar capacidad para:
-
-- diseñar una arquitectura segmentada
+- disenar una arquitectura segmentada
 - operar servicios con criterio
-- reducir exposición innecesaria
-- centralizar resolución interna
-- observar el entorno
-- respaldar y recuperar componentes críticos
-- documentar decisiones y límites
+- reducir exposicion innecesaria
+- centralizar resolucion interna
+- observar el entorno con dashboards utiles
+- respaldar y recuperar componentes criticos
+- documentar decisiones, incidentes y limites
 
-## Qué demuestra este proyecto
+## Separacion publico / privado
 
-| Capacidad | Cómo se refleja en el repo |
+| Capa | Proposito |
 |---|---|
-| Arquitectura | Segmentación por zonas, dependencias claras, publicación controlada |
-| Operación | Runbook, controles diarios/semanales, troubleshooting por escenario |
-| Seguridad | Acceso por mínimo privilegio, servicios administrativos no expuestos, endurecimiento por rol |
-| Observabilidad | Separación entre monitoreo de infraestructura y visibilidad de seguridad |
-| Continuidad | Backups, snapshots, enfoque DRP, distinción entre copia y recuperación |
-| Comunicación técnica | Documentación clara, sanitizada y defendible |
+| Documentacion privada | operacion real, evidencias, incidentes, rutas, scripts, errores y datos criticos |
+| Repositorio publico | version sanitizada para explicacion tecnica y revision de arquitectura |
+
+La informacion operativa real no se copia directamente al repositorio publico. Primero se transforma en patrones, decisiones y aprendizajes sin datos identificables.
+
+## Que demuestra este proyecto
+
+| Capacidad | Como se refleja en el repo |
+|---|---|
+| Arquitectura | segmentacion por zonas, dependencias claras, publicacion controlada |
+| Operacion | runbook, checks periodicos, diagnostico por escenario |
+| Seguridad | minimo privilegio, administracion no expuesta, endurecimiento por rol |
+| Observabilidad | separacion entre metricas operativas y visibilidad de seguridad |
+| Continuidad | modelo de backup, estrategia offsite y restore como hito de madurez |
+| Comunicacion tecnica | documentacion clara, sanitizada y defendible |
 
 ## Componentes principales
 
-| Capa | Función |
+| Capa | Funcion |
 |---|---|
-| Hypervisor | Virtualización, tránsito entre segmentos, punto de control central |
-| DNS interno | Resolución centralizada y consistencia de acceso |
-| Plataforma de aplicaciones | Host para servicios internos |
-| Seguridad | SIEM y telemetría de eventos |
-| Monitoreo | Métricas, dashboards y visibilidad operativa |
-| Storage | Repositorio de datos y nodo de backups |
-| Acceso remoto | Diseño de acceso seguro bajo modelo VPN |
+| Hypervisor | virtualizacion, transito entre segmentos, punto de control central |
+| DNS interno | resolucion centralizada y consistencia de acceso |
+| Plataforma de aplicaciones | host para servicios internos |
+| Seguridad | SIEM y telemetria de eventos |
+| Monitoreo | metricas, dashboards y visibilidad operativa |
+| Storage | repositorio de datos y nodo de backups |
+| Acceso remoto | diseno de acceso seguro bajo modelo VPN |
 
 ## Estado actual resumido
 
-### Ya resuelto
+### Resuelto
 
-- segmentación lógica por zonas
+- segmentacion logica por zonas
 - DNS interno centralizado
 - plataforma de aplicaciones operativa
 - observabilidad base operativa
-- almacenamiento y pipeline de backup documentados
-- runbook maestro traducido a un formato público
-- enfoque documental más maduro y entendible
+- estrategia de backup y modelo offsite documentados
+- enfoque de dashboards operativos, no decorativos
+- documentacion publica separada de la documentacion privada
 
-### Pendientes de alto valor
+### En maduracion
 
-- prueba real de restore
-- alertas operativas más accionables
+- restore tests formales
+- alertas operativas mas accionables
+- evidencia SIEM para eventos criticos de backup
 - redundancia DNS
-- mejora del acceso remoto bajo restricciones de conectividad
-- endurecimiento v2 por rol
+- mejoras de acceso remoto bajo restricciones de conectividad
+- hardening v2 por rol
 
-## Topología lógica simplificada
+## Topologia logica simplificada
 
 ```mermaid
 flowchart LR
-    A[Workstation de administración] --> B[DNS interno]
+    A[Workstation de administracion] --> B[DNS interno]
     A --> C[Hypervisor]
     C --> D[Zona de servicios]
     C --> E[Zona de seguridad]
@@ -85,20 +88,19 @@ flowchart LR
     F --> L[Acceso remoto seguro]
 ```
 
-## Estado canónico del proyecto
+## Estado canonico del proyecto
 
 | Aspecto | Estado |
 |---|---|
-| Arquitectura | Estable y documentada |
-| Seguridad base | Aplicada con enfoque por rol |
-| Observabilidad | Funcional |
-| Backups | Operativos y documentados |
-| Recuperación | Parcialmente demostrada, con restore test pendiente |
-| Madurez documental | Alta para uso público |
+| Arquitectura | estable y documentada |
+| Seguridad base | aplicada con enfoque por rol |
+| Observabilidad | funcional y en mejora continua |
+| Backups | operativos y documentados |
+| Recuperacion | parcialmente demostrada; restore formal pendiente |
+| Documentacion publica | sanitizada y tecnicamente defendible |
 
-## Lectura correcta del proyecto
+## Lectura correcta
 
-Este homelab no busca parecer “enterprise” por decoración.  
-Busca mostrar algo más serio:
+Este homelab no busca parecer enterprise por decoracion. Busca mostrar algo mas serio:
 
-> una infraestructura pequeña, razonada, operable y explicable.
+> una infraestructura pequena, razonada, operable y explicable.

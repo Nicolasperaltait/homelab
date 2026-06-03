@@ -1,165 +1,138 @@
-# 05 — Backup and Recovery
+# 05 - Backup and Recovery
 
-## Philosophy
+## Purpose
 
-Backups are treated as an operational control, not a checkbox.
+Describe the public backup and recovery strategy for the homelab.
 
-This document focuses on:
+## Principles
 
-- what needs to be recoverable
-- where backup layers exist
-- how recovery paths differ
-- why restore confidence matters more than archive count
+- recovery matters more than having a copy
+- snapshots and backups are not the same thing
+- offsite copy without restore capability is not enough
+- periodic validation is part of the design
+- a backup window should answer a clear operational question
+- configuration needed to decrypt or restore is also critical
 
----
+## Backup model layers
 
-## Backup layers
+| Layer | Scope |
+|---|---|
+| Infrastructure | VMs, disks and platform rollback |
+| Application | critical service data |
+| Local storage | operational backup repository |
+| Archive/package | domain-level consolidation |
+| Encrypted offsite | external copy for major-loss scenarios |
+| Evidence | logs, status, alerts and validation |
 
-| Layer | Scope | Why it exists |
-|---|---|---|
-| VM / infrastructure | full VM state | broad recovery from host or VM failure |
-| Application / service | app data and config | faster service-level recovery |
-| Archive layer | compressed/exported copies | portable recovery points |
-| Offsite encrypted copy | remote resilience | disaster tolerance |
-
----
-
-## Public-safe backup flow
+## Logical flow
 
 ```mermaid
 flowchart LR
-    SRC[Service or Data Source] --> STG[Local Staging]
-    STG --> ARC[Archive / Package]
-    ARC --> NAS[Storage Repository]
-    NAS --> OFF[Encrypted Offsite Copy]
+    A[Data source] --> B[Local backup]
+    B --> C[Storage]
+    C --> D[Archive package]
+    D --> E[Encrypted offsite]
+    D --> F[Validation]
+    F --> G[Event / evidence]
 ```
 
----
+## Operational backup window
 
-## Why snapshots are not enough
+The public design does not publish real schedules. The operational criteria are:
 
-Snapshots are useful, but they are not the same as backups.
+- run critical backups during a low-activity window
+- separate small and heavy backups to improve visibility
+- refresh metrics after the window should be complete
+- answer the question: can I operate today with confidence?
 
-| Snapshot | Backup |
+## What should be protected
+
+- VM state
+- critical service data
+- configuration required for recovery
+- minimum operational continuity
+- ability to return to a known good state
+- evidence that a backup was not only created, but validated
+
+## Key distinction
+
+| Concept | Correct use |
 |---|---|
-| fast rollback | durable recovery artifact |
-| tied to platform context | more portable |
-| good for change windows | good for failure recovery |
-| not a full resilience strategy | part of a resilience strategy |
+| Snapshot | fast rollback for specific changes |
+| Backup | more portable recovery artifact |
+| Offsite | resilience against local loss |
+| Restore test | evidence that recovery is real |
+| Alert | actionable signal, not a substitute for validation |
 
----
+## Encrypted offsite copy
 
-## Recovery categories
+The external copy is treated as a resilience control, not just storage.
 
-### 1. Service-level recovery
-Use when:
+Public principles:
 
-- the platform is healthy
-- the application state is damaged
-- a targeted restore is faster than rolling back the whole VM
+- offsite content should be encrypted
+- recovery keys/configuration are critical material
+- remote names, real paths and full configs are not published
+- offsite presence is validated, but it does not replace restore testing
 
-### 2. VM-level recovery
-Use when:
+## Recovery scenarios
 
-- the service host is damaged
-- the operating system or VM state is compromised
-- broad rollback is faster and safer
+### Scenario A - Service failure
 
-### 3. Offsite recovery
-Use when:
-
-- local storage is unavailable
-- a major platform or site failure affects primary recovery paths
-
----
-
-## Recovery confidence model
-
-| Level | Meaning |
-|---|---|
-| low | artifacts exist, but restore has not been demonstrated |
-| medium | backup workflow validated, limited restore confidence |
-| high | restore has been tested and documented |
-
-The most important maturity step is moving from **artifact presence** to **tested recovery**.
-
----
-
-## Core backup design ideas
-
-- separate backup scope by role
-- keep archives understandable
-- validate that output is readable
-- protect critical recovery configuration
-- distinguish convenience from recoverability
-
----
-
-## What a professional backup story should include
-
-- scope
-- retention logic
-- storage destination
-- offsite strategy
-- validation method
-- restore method
-- known recovery limits
-
-This document intentionally emphasizes the last two.
-
----
-
-## Known backup risks
-
-| Risk | Why it matters |
-|---|---|
-| backup exists but restore is untested | false confidence |
-| offsite path exists but key config is missing | recovery gap |
-| retention is unclear | operator confusion during cleanup |
-| snapshots are treated as backups | weak resilience model |
-
----
-
-## Public-safe recovery scenarios
-
-### Scenario A — Application corruption
-Preferred response:
 - preserve evidence if needed
-- restore the service data set or archive
-- validate application startup
-- validate business function
+- validate network, DNS and storage dependencies
+- restore from domain-level copy if appropriate
+- confirm that the application returns healthy
 
-### Scenario B — VM failure
-Preferred response:
-- restore VM-level backup or clean platform state
-- revalidate dependencies
-- revalidate service exposure and monitoring
+### Scenario B - VM failure
 
-### Scenario C — Local storage failure
-Preferred response:
-- use offsite encrypted recovery path
-- restore in stages
-- validate configuration dependencies first
+- evaluate fast rollback
+- restore VM backup where appropriate
+- validate network, boot and reachability
 
----
+### Scenario C - Partial storage loss
 
-## What remains the most important open item
+- isolate impact
+- recover from local archive or external copy
+- rebuild the minimum operational flow
 
-A mature backup system is not defined by:
+### Scenario D - Broad environment loss
 
-- the number of zip files
-- the number of remotes
-- the number of cron jobs
+- reinstall base platform
+- restore priority components
+- rebuild connectivity and DNS
+- recover critical services by priority
 
-It is defined by:
+## Recovery priority
 
-> whether a restore can be performed cleanly, intentionally, and without improvisation
+| Priority | Component |
+|---|---|
+| High | hypervisor, internal DNS, storage, application platform |
+| High | critical service data and configuration |
+| Medium | observability and dashboards |
+| Variable | auxiliary or lab services |
 
-That is why restore testing remains the key maturity marker.
+## Open risks
 
----
+| Risk | State |
+|---|---|
+| formal restore test | pending |
+| stronger automated validation | future improvement |
+| physical storage redundancy | evolution pending |
+| SIEM alerting and evidence | maturing |
+| dependency on critical offsite configuration | controlled in private documentation |
 
-## Summary
+## Desired operational indicators
 
-The backup design is already meaningful.  
-The next real milestone is turning it into a **measured recovery practice**.
+- recent backup visible
+- recent archive readable
+- recent external copy
+- logs without critical error
+- understandable status event
+- periodic restore test documented
+
+## Core idea
+
+This design focuses on the outcome that matters:
+
+> recovery and continuity awareness.
