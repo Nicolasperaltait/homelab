@@ -116,8 +116,8 @@ Public principles:
 
 | Risk | State |
 |---|---|
-| formal restore test | pending |
-| stronger automated validation | future improvement |
+| formal restore test | pending (active critical path) |
+| stronger automated validation | maturing (per-cycle evidence implemented) |
 | physical storage redundancy | evolution pending |
 | SIEM alerting and evidence | maturing |
 | dependency on critical offsite configuration | controlled in private documentation |

@@ -76,16 +76,19 @@ The public version does not include real rules, IDs, paths, JSON events or agent
 - infrastructure dashboards
 - initial security visibility
 - distinction between monitoring and security
+- backup window validated with automated evidence (consecutive cycles confirmed, event and checksum emitted per run)
+- SIEM active agent inventory completed; agents for decommissioned hosts removed from the manager
+- NOC display node operational: internal DNS resolving, kiosk towards operational dashboard validated
 - public documentation of the approach
 - separation between private and public documentation
 
 ### Maturing
 
-- more actionable alerts
+- actionable alerts by channel (critical notifications; integration pending)
 - more executive dashboards
 - finer storage and network monitoring
 - better integration of critical events
-- restore tests as recovery evidence
+- restore tests as recovery evidence (active critical path)
 
 ## Prioritized roadmap
 

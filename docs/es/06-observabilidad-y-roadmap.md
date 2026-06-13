@@ -76,16 +76,19 @@ La version publica no incluye reglas reales, IDs, paths, eventos JSON ni nombres
 - dashboards de infraestructura
 - visibilidad de seguridad inicial
 - diferenciacion entre monitoreo y seguridad
+- ventana operativa de backups validada con evidencia automatizada (ciclos consecutivos confirmados, emision de evento y checksum por corrida)
+- inventario de agentes SIEM activos completado; agentes de hosts dados de baja eliminados del manager
+- nodo NOC operativo: DNS interno resolviendo, kiosk hacia dashboard validado
 - documentacion publica del enfoque
 - separacion entre documentacion privada y publica
 
 ### En maduracion
 
-- alertas mas accionables
+- alertas accionables por canal (notificaciones criticas; pendiente integracion)
 - paneles mas ejecutivos
 - monitoreo mas fino de storage y red
 - mejor integracion de eventos criticos
-- restore tests como evidencia de recuperacion
+- restore tests como evidencia de recuperacion (ruta critica activa)
 
 ## Roadmap priorizado
 
