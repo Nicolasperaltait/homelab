@@ -116,8 +116,8 @@ Principios publicos:
 
 | Riesgo | Estado |
 |---|---|
-| restore test formal | pendiente |
-| validacion automatica mas fuerte | mejora futura |
+| restore test formal | pendiente (ruta critica activa) |
+| validacion automatica mas fuerte | en maduracion (evidencia por ciclo implementada) |
 | redundancia fisica de storage | pendiente de evolucion |
 | alertas y evidencia SIEM | en maduracion |
 | dependencia de configuracion critica para offsite | controlada en documentacion privada |

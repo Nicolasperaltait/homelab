@@ -56,14 +56,17 @@ Real operational information is not copied directly into the public repository. 
 - centralized internal DNS
 - operational application platform
 - baseline observability
-- documented backup strategy and offsite recovery model
+- documented and validated backup strategy and offsite recovery model (backup window confirmed across multiple consecutive cycles with automated evidence)
+- SIEM agent inventory completed; decommissioned hosts removed from the manager
+- NOC display node operational: internal DNS resolution and kiosk mode validated
+- operational access profiles standardized by role (admin / operator)
 - operational dashboard approach
 - public documentation separated from private documentation
 
 ### Maturing
 
-- formal restore tests
-- more actionable operational alerts
+- formal restore tests (active critical path)
+- more actionable operational alerts (Discord / notifications)
 - SIEM evidence for critical backup events
 - DNS redundancy
 - remote access improvements under connectivity constraints
@@ -95,8 +98,8 @@ flowchart LR
 | Architecture | stable and documented |
 | Baseline security | applied with a role-aware approach |
 | Observability | functional and improving |
-| Backups | operational and documented |
-| Recovery | partially demonstrated; formal restore test pending |
+| Backups | operational, documented and validated with automated evidence |
+| Recovery | window validated; formal restore test pending (active critical path) |
 | Public documentation | sanitized and technically defensible |
 
 ## Correct reading

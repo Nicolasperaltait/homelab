@@ -56,14 +56,17 @@ La informacion operativa real no se copia directamente al repositorio publico. P
 - DNS interno centralizado
 - plataforma de aplicaciones operativa
 - observabilidad base operativa
-- estrategia de backup y modelo offsite documentados
+- estrategia de backup y modelo offsite documentados y validados (ventana operativa confirmada en multiples ciclos consecutivos con evidencia automatizada)
+- inventario de agentes SIEM completado; hosts dados de baja removidos del manager
+- nodo NOC operativo: DNS interno y modo kiosk validados
+- perfil de acceso operativo estandarizado por rol (administrador / operador)
 - enfoque de dashboards operativos, no decorativos
 - documentacion publica separada de la documentacion privada
 
 ### En maduracion
 
-- restore tests formales
-- alertas operativas mas accionables
+- restore tests formales (ruta critica activa)
+- alertas operativas accionables (Discord / notificaciones)
 - evidencia SIEM para eventos criticos de backup
 - redundancia DNS
 - mejoras de acceso remoto bajo restricciones de conectividad
@@ -95,8 +98,8 @@ flowchart LR
 | Arquitectura | estable y documentada |
 | Seguridad base | aplicada con enfoque por rol |
 | Observabilidad | funcional y en mejora continua |
-| Backups | operativos y documentados |
-| Recuperacion | parcialmente demostrada; restore formal pendiente |
+| Backups | operativos, documentados y validados con evidencia automatizada |
+| Recuperacion | ventana validada; restore test formal pendiente (ruta critica) |
 | Documentacion publica | sanitizada y tecnicamente defendible |
 
 ## Lectura correcta
