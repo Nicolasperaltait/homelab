@@ -77,6 +77,7 @@ La version publica no incluye reglas reales, IDs, paths, eventos JSON ni nombres
 - visibilidad de seguridad inicial
 - diferenciacion entre monitoreo y seguridad
 - ventana operativa de backups validada con evidencia automatizada (ciclos consecutivos confirmados, emision de evento y checksum por corrida)
+- restore tests automatizados como evidencia de recuperacion: integridad mas arranque real del servicio validados por ciclo, RTO/RPO medidos, sin almacenar credenciales
 - inventario de agentes SIEM activos completado; agentes de hosts dados de baja eliminados del manager
 - nodo NOC operativo: DNS interno resolviendo, kiosk hacia dashboard validado
 - documentacion publica del enfoque
@@ -88,7 +89,6 @@ La version publica no incluye reglas reales, IDs, paths, eventos JSON ni nombres
 - paneles mas ejecutivos
 - monitoreo mas fino de storage y red
 - mejor integracion de eventos criticos
-- restore tests como evidencia de recuperacion (ruta critica activa)
 
 ## Roadmap priorizado
 
@@ -106,7 +106,6 @@ flowchart TD
 
 | Prioridad | Item | Motivo |
 |---|---|---|
-| Critica | Restore test real | cerrar la brecha entre backup y recuperacion |
 | Alta | Alertas operativas | reducir tiempo de reaccion |
 | Alta | Evidencia SIEM de backups | demostrar fallos y estado con trazabilidad |
 | Alta | Redundancia DNS | bajar punto unico de falla |

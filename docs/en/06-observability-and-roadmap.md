@@ -77,6 +77,7 @@ The public version does not include real rules, IDs, paths, JSON events or agent
 - initial security visibility
 - distinction between monitoring and security
 - backup window validated with automated evidence (consecutive cycles confirmed, event and checksum emitted per run)
+- automated restore tests as recovery evidence: integrity plus real service boot validated per cycle, RTO/RPO measured, without storing credentials
 - SIEM active agent inventory completed; agents for decommissioned hosts removed from the manager
 - NOC display node operational: internal DNS resolving, kiosk towards operational dashboard validated
 - public documentation of the approach
@@ -88,7 +89,6 @@ The public version does not include real rules, IDs, paths, JSON events or agent
 - more executive dashboards
 - finer storage and network monitoring
 - better integration of critical events
-- restore tests as recovery evidence (active critical path)
 
 ## Prioritized roadmap
 
@@ -106,7 +106,6 @@ flowchart TD
 
 | Priority | Item | Why it matters |
 |---|---|---|
-| Critical | restore test | closes the gap between backup and recovery |
 | High | operational alerts | reduces time to react |
 | High | SIEM evidence for backups | proves failures and status with traceability |
 | High | DNS redundancy | reduces a central dependency risk |

@@ -75,6 +75,40 @@ Principios publicos:
 - no se publican nombres de remotos, rutas reales ni configuraciones completas
 - se valida presencia offsite, pero eso no reemplaza restore test
 
+## Validacion de restore (restore tests)
+
+La recuperacion dejo de ser una suposicion: se valida de forma automatica y periodica,
+en una VM dedicada de recuperacion (rol DR) separada de produccion.
+
+Decision de seguridad: la validacion NO almacena credenciales. En vez de un login real
+(que obligaria a guardar una clave maestra o API key), se valida:
+
+- integridad de los datos restaurados: checksum del paquete, verificacion de integridad
+  de la base y conteos esperados
+- arranque real del servicio critico desde el backup, en una instancia aislada (solo
+  loopback, nunca publicada), que debe responder sana
+- vault documental: integridad del paquete y validez de su estructura, sin abrir el
+  contenido en vivo
+
+Propiedades de seguridad del proceso:
+
+- los datos restaurados son efimeros: viven en memoria o area temporal y se borran al
+  terminar cada corrida
+- la instancia de validacion esta aislada y nunca se expone a la red
+- el acceso al backup es de minimo privilegio: un canal restringido que solo entrega el
+  ultimo paquete y nada mas
+- la evidencia guarda conteos y metadatos, nunca contenido sensible
+- una corrida fallida deja una senal accionable (estado en metricas), no silencio
+
+RTO / RPO: cada corrida mide el tiempo de recuperacion (RTO) y la antiguedad del backup
+usado (RPO), y los publica como metricas. Como referencia, el servicio de credenciales se
+recupera en segundos y el dominio documental en el orden de un par de minutos (dominado por
+el tamano del paquete). El RPO queda acotado por la cadencia diaria de backup.
+
+Cadencia: el servicio critico se valida con mayor frecuencia (paquete chico) y el dominio
+documental con menor frecuencia (paquete grande), para equilibrar garantia y costo de
+transferencia. La variante offsite sigue la misma logica.
+
 ## Escenarios de recuperacion
 
 ### Escenario A - Falla de servicio
@@ -116,8 +150,8 @@ Principios publicos:
 
 | Riesgo | Estado |
 |---|---|
-| restore test formal | pendiente (ruta critica activa) |
-| validacion automatica mas fuerte | en maduracion (evidencia por ciclo implementada) |
+| restore test formal | implementado (validacion automatica por ciclo, RTO/RPO medidos) |
+| validacion automatica mas fuerte | reforzada (integridad + arranque real validados por ciclo) |
 | redundancia fisica de storage | pendiente de evolucion |
 | alertas y evidencia SIEM | en maduracion |
 | dependencia de configuracion critica para offsite | controlada en documentacion privada |

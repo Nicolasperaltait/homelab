@@ -75,6 +75,40 @@ Public principles:
 - remote names, real paths and full configs are not published
 - offsite presence is validated, but it does not replace restore testing
 
+## Restore validation (restore tests)
+
+Recovery is no longer an assumption: it is validated automatically and periodically, on a
+dedicated recovery VM (DR role) separated from production.
+
+Security decision: validation does NOT store credentials. Instead of a real login (which
+would require keeping a master password or API key), it validates:
+
+- integrity of the restored data: package checksum, database integrity check and expected
+  record counts
+- a real boot of the critical service from the backup, in an isolated instance (loopback
+  only, never published), which must respond healthy
+- documentation vault: package integrity and structural validity, without opening the
+  live content
+
+Security properties of the process:
+
+- restored data is ephemeral: it lives in memory or a temporary area and is wiped at the
+  end of each run
+- the validation instance is isolated and never exposed to the network
+- backup access is least-privilege: a restricted channel that only delivers the latest
+  package and nothing else
+- evidence records counts and metadata, never sensitive content
+- a failed run leaves an actionable signal (status in metrics), not silence
+
+RTO / RPO: each run measures the recovery time (RTO) and the age of the backup used (RPO),
+and publishes them as metrics. As a reference, the credentials service recovers in seconds
+and the documentation domain in the order of a couple of minutes (dominated by package
+size). RPO is bounded by the daily backup cadence.
+
+Cadence: the critical service is validated more frequently (small package) and the
+documentation domain less frequently (large package), to balance assurance against transfer
+cost. The offsite variant follows the same logic.
+
 ## Recovery scenarios
 
 ### Scenario A - Service failure
@@ -116,8 +150,8 @@ Public principles:
 
 | Risk | State |
 |---|---|
-| formal restore test | pending (active critical path) |
-| stronger automated validation | maturing (per-cycle evidence implemented) |
+| formal restore test | implemented (automated per-cycle validation, RTO/RPO measured) |
+| stronger automated validation | strengthened (integrity + real service boot validated per cycle) |
 | physical storage redundancy | evolution pending |
 | SIEM alerting and evidence | maturing |
 | dependency on critical offsite configuration | controlled in private documentation |
