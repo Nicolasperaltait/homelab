@@ -68,7 +68,7 @@ Una leccion importante del proyecto es que un hardening generico no sirve para t
 | DNS interno | permitir puertos funcionales de resolucion y administracion minima |
 | NAS / storage | proteger shares y paneles segun origen |
 | SIEM | exponer solo puertos requeridos para dashboard y agentes |
-| [host de contenedores] | tratamiento especial por networking, bridge y proxy |
+| Host de contenedores | tratamiento especial por networking, bridge y proxy |
 | Hypervisor | control fino de firewall, forwarding y transito |
 
 ## Flujos legitimos entre zonas

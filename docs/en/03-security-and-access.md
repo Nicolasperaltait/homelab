@@ -68,7 +68,7 @@ A key lesson from the project is that generic hardening does not fit every host.
 | Internal DNS | allow functional resolver ports and minimal administration |
 | NAS / storage | protect shares and panels by source |
 | SIEM | expose only required dashboard and agent ports |
-| [host de contenedores] | special handling for bridge networking and proxy behavior |
+| Container host | special handling for bridge networking and proxy behavior |
 | Hypervisor | careful control of firewall, forwarding and transit |
 
 ## Legitimate cross-zone flows
