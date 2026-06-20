@@ -5,3 +5,13 @@ docs/es/07-politica-publicacion-segura.md
 docs/en/07-publication-safety-policy.md
 docs/es/resumen-publico.md
 docs/en/project-overview.md
+
+# Backlog y planificaciones internas (no publicar en repo publico).
+Pendiente-main.md
+Planificaciones-main/
+
+# Guía interna de navegación (no publicar).
+AGENTS.md
+
+# Artefactos de mount (no versionar).
+.fuse_hidden*

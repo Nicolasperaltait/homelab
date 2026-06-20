@@ -48,16 +48,16 @@ flowchart LR
 
 ## Logical service map
 
-| Service role | Platform family | Zone | Purpose |
+| Service role | Technology family (conceptual) | Zone | Purpose |
 |---|---|---|---|
-| Hypervisor | [hipervisor sanitizado] | Management | compute, gateway, segmentation control |
-| Internal DNS | [resolver DNS interno sanitizado] | Management | name resolution and DNS filtering |
-| Storage / NAS | [solucion NAS sanitizada] | Management | backup target and shared storage |
-| App platform | Linux VM + [runtime de contenedores sanitizado] | Applications | self-hosted services |
-| Reverse proxy | [reverse proxy sanitizado] | Applications | controlled internal publication |
-| Security monitoring | [plataforma SIEM sanitizada] | Security | event collection and visibility |
-| Metrics and dashboards | [TSDB y capa de dashboards sanitizadas] | Applications | observability |
-| VPN | [servicio VPN sanitizado] | VPN | secure remote access model |
+| Hypervisor | open-source hypervisor | Management | compute, gateway, segmentation control |
+| Internal DNS | internal DNS resolver with filtering | Management | name resolution and DNS filtering |
+| Storage / NAS | open-source NAS solution | Management | backup target and shared storage |
+| App platform | container runtime on a Linux VM | Applications | self-hosted services |
+| Reverse proxy | managed reverse proxy | Applications | controlled internal publication |
+| Security monitoring | open-source SIEM platform | Security | event collection and visibility |
+| Metrics and dashboards | metrics TSDB + dashboard layer | Applications | observability |
+| VPN | modern encrypted-tunnel VPN | VPN | secure remote access model |
 
 ---
 

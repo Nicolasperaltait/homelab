@@ -52,16 +52,16 @@ Eso convierte al host de virtualización en una pieza doblemente crítica:
 
 ## Servicios por función
 
-| Función | Ejemplo de familia tecnológica | Rol en el diseño |
+| Función | Familia tecnológica (conceptual) | Rol en el diseño |
 |---|---|---|
-| Virtualización | [hipervisor sanitizado] | host principal y núcleo de tránsito |
-| DNS interno | [resolver DNS interno sanitizado] | resolución interna y consistencia de acceso |
-| Plataforma de apps | [runtime de contenedores sanitizado] sobre VM | ejecución de servicios internos |
-| Proxy | [reverse proxy sanitizado] | publicación controlada de servicios web |
-| SIEM | [plataforma SIEM sanitizada] | visibilidad de eventos y seguridad |
-| Monitoreo | [TSDB y capa de dashboards sanitizadas] | salud, métricas y dashboards |
-| NAS | [solucion NAS sanitizada] | almacenamiento y soporte de backup |
-| VPN | [VPN de tunel sanitizada] | diseño de acceso remoto seguro |
+| Virtualización | hypervisor open-source | host principal y núcleo de tránsito |
+| DNS interno | resolver DNS interno con filtrado | resolución interna y consistencia de acceso |
+| Plataforma de apps | runtime de contenedores sobre VM | ejecución de servicios internos |
+| Proxy | reverse proxy gestionado | publicación controlada de servicios web |
+| SIEM | plataforma SIEM open-source | visibilidad de eventos y seguridad |
+| Monitoreo | TSDB de métricas + capa de dashboards | salud, métricas y dashboards |
+| NAS | solución NAS open-source | almacenamiento y soporte de backup |
+| VPN | VPN de túnel cifrado moderno | diseño de acceso remoto seguro |
 
 ## Dependencias críticas
 
