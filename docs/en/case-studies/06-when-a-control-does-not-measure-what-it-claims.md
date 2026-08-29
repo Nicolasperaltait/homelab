@@ -122,6 +122,52 @@ ignore it.
 Fix: wait for the count to **stabilise**, and distinguish "may still be loading"
 from "failed".
 
+### 8. The sanitisation that only looked at the working tree
+
+**Found on 2026-08-29, and it is the most uncomfortable case because it concerns
+this very repository.**
+
+This public repository has a documented sanitisation policy, with a list of
+sensitive patterns and a mandatory scan. The scan was run against drafts and
+against the diff before each commit.
+
+**It was never run against history.**
+
+Months earlier, a commit removed the environment's internal naming from the
+working tree. The earlier commits kept it, and those commits **were already
+published**.
+
+The result: the working tree was clean, the scan passed, and the repository
+displayed a "sanitized" badge that **was true of the tree and false of the
+repository**.
+
+**Same pattern as the seven previous cases: the action was verified -this commit
+is clean- instead of the effect -the repository is clean-.**
+
+Fix:
+
+- history rewritten, with sensitive values replaced by explicit redaction
+  markers, so an old commit plainly says it was sanitised rather than pretending
+  it never said anything else;
+- a verified backup of the full repository before touching anything;
+- **the check now walks every object in every commit**, not just the diff of the
+  change being made.
+
+**Honest severity:** what was exposed were internal name suffixes, not routable
+and worthless on their own. The real cost was not technical: it was the gap
+between what the repository claimed about itself and what it did.
+
+### And the check on the fix was wrong too
+
+The first verification that history was clean used a shell pipeline where **the
+exit status came from the last command rather than from the search**. It reported
+matches on an empty result.
+
+It was redone by measuring the content instead of the exit status, and a second
+independent check was added over every object in the repository.
+
+**Even the check on the fix needed checking.**
+
 ## The pattern
 
 All seven are the same error in different clothes:
