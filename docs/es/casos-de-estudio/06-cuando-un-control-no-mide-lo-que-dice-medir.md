@@ -160,6 +160,31 @@ Correccion:
 enrutables y sin valor por si mismos. El costo real no era tecnico: era la
 distancia entre lo que el repositorio afirmaba de si mismo y lo que hacia.
 
+### Y la primera correccion tambien fue incompleta
+
+**La reescritura del historial se hizo dos veces el mismo dia.**
+
+La primera paso sobre la nomenclatura interna y **dejo intactos siete nombres de
+producto**. El motivo es el mismo defecto una vez mas: **la lista de reemplazos
+salio del escaneo previo, y ese escaneo buscaba solo lo que ya se sospechaba.**
+La correccion heredo el punto ciego de la busqueda que la definio.
+
+Se detecto verificando **contra el remoto** despues de publicar, no contra la
+copia local. Que un envio termine bien no prueba que lo publicado este limpio.
+
+La segunda pasada cambio el metodo: en vez de buscar una lista de terminos
+sospechados, **se enumero lo que efectivamente habia** -todas las frases con el
+patron de cobertura que el repositorio usaba, y una barrida amplia de nombres de
+producto de infraestructura- y recien despues se construyeron los reemplazos.
+
+**Buscar lo que uno sospecha encuentra lo que uno sospecha.** Para saber que hay,
+hay que enumerar.
+
+**Severidad, otra vez sin adornos:** nombres de producto no son un dato sensible;
+saber que stack corre alguien no abre nada. Lo que estaba mal era la
+inconsistencia entre lo que este repositorio declara -no nombrar productos- y lo
+que su historial mostraba.
+
 ### Y la comprobacion de la correccion tambien estaba mal
 
 La primera verificacion de que el historial habia quedado limpio uso una tuberia

@@ -157,6 +157,32 @@ Fix:
 and worthless on their own. The real cost was not technical: it was the gap
 between what the repository claimed about itself and what it did.
 
+### And the first fix was incomplete too
+
+**History was rewritten twice on the same day.**
+
+The first pass covered the internal naming and **left seven product names
+untouched**. The reason is the same defect once more: **the replacement list came
+from the preliminary scan, and that scan only looked for what was already
+suspected.** The fix inherited the blind spot of the search that defined it.
+
+It was caught by verifying **against the remote** after publishing, not against
+the local copy. A push completing successfully does not prove that what was
+published is clean.
+
+The second pass changed the method: instead of searching for a list of suspected
+terms, **what was actually there was enumerated** -every phrase matching the
+hedging pattern the repository used, plus a broad sweep of infrastructure product
+names- and only then were the replacements built.
+
+**Searching for what you suspect finds what you suspect.** To know what is there,
+you have to enumerate.
+
+**Severity, again without dressing it up:** product names are not sensitive data;
+knowing someone's stack opens nothing. What was wrong was the inconsistency
+between what this repository states -that it does not name products- and what its
+history showed.
+
 ### And the check on the fix was wrong too
 
 The first verification that history was clean used a shell pipeline where **the
