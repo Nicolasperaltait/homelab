@@ -125,6 +125,52 @@ calla ante una falla real**, y peor a mediano plazo: entrena a ignorarlo.
 Correccion: esperar a que el conteo **se estabilice**, y distinguir "puede seguir
 cargando" de "fallo".
 
+### 8. La sanitizacion que solo miraba el arbol de trabajo
+
+**Descubierto el 2026-08-29, y es el caso mas incomodo porque afecta a este mismo
+repositorio.**
+
+Este repositorio publico tiene una politica de sanitizacion documentada, con una
+lista de patrones sensibles y un escaneo obligatorio. El escaneo se corria sobre
+los borradores y sobre el diff antes de cada commit.
+
+**Nunca se corrio contra el historial.**
+
+Meses atras, un commit retiro del arbol de trabajo la nomenclatura interna del
+entorno. Los commits anteriores la conservaban, y esos commits **ya estaban
+publicados**.
+
+El resultado: el arbol de trabajo estaba limpio, el escaneo pasaba, y el
+repositorio mostraba una insignia de "sanitizado" que **era cierta del arbol y
+falsa del repositorio**.
+
+**Mismo patron que los siete casos anteriores: se verifico la accion -este commit
+esta limpio- en vez del efecto -el repositorio esta limpio-.**
+
+Correccion:
+
+- historial reescrito, con los valores sensibles reemplazados por marcadores de
+  redaccion explicitos, para que un commit viejo diga claramente que fue
+  saneado en vez de simular que nunca dijo otra cosa;
+- respaldo verificado del repositorio completo antes de tocar nada;
+- **la comprobacion pasa a recorrer todos los objetos de todos los commits**, no
+  solo el diff del cambio que se esta haciendo.
+
+**Severidad honesta:** lo expuesto eran sufijos de nombres internos, no
+enrutables y sin valor por si mismos. El costo real no era tecnico: era la
+distancia entre lo que el repositorio afirmaba de si mismo y lo que hacia.
+
+### Y la comprobacion de la correccion tambien estaba mal
+
+La primera verificacion de que el historial habia quedado limpio uso una tuberia
+de shell donde **el codigo de salida venia del ultimo comando y no de la
+busqueda**. Informaba coincidencias sobre un resultado vacio.
+
+Se rehizo midiendo el contenido en vez del codigo de salida, y se agrego una
+segunda comprobacion independiente sobre cada objeto del repositorio.
+
+**Hasta la comprobacion del arreglo necesito ser comprobada.**
+
 ## El patron
 
 Los siete casos son el mismo error con distinta ropa:
