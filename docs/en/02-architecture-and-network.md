@@ -42,7 +42,7 @@ flowchart LR
 | Management / LAN | management zone | local admin access, DNS, NAS, hypervisor management |
 | Applications | application zone | internal applications and reverse proxy |
 | Security | security zone | SIEM and security telemetry |
-| VPN | remote access zone | remote access entry model |
+| ~~VPN~~ | ~~remote access zone~~ | **retired as a network zone.** See the model change in doc 03 |
 
 ---
 
@@ -57,7 +57,7 @@ flowchart LR
 | Reverse proxy | managed reverse proxy | Applications | controlled internal publication |
 | Security monitoring | open-source SIEM platform | Security | event collection and visibility |
 | Metrics and dashboards | metrics TSDB + dashboard layer | Applications | observability |
-| VPN | modern encrypted-tunnel VPN | VPN | secure remote access model |
+| Remote access | **overlay mesh with per-node identity** | Overlay | remote access without exposing inbound ports |
 
 ---
 
@@ -104,7 +104,7 @@ Instead, the intended model is:
 | Management | All zones | administration and validation |
 | Applications | Security | service publication or telemetry workflows |
 | Applications | Management / Storage | backup or file workflow integration |
-| VPN | Management and selected services | secure remote administrative access |
+| Remote access mesh | Management and selected services, **per advertised route** | secure remote administrative access with no inbound ports |
 
 ---
 

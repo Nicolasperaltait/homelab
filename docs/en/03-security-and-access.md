@@ -12,7 +12,7 @@ The environment follows a small but explicit model:
 - least privilege
 - reduced lateral movement
 - administrative access not publicly exposed
-- remote access through a VPN-style pattern
+- remote access through an overlay mesh, with no inbound ports
 - documented exceptions when cross-zone flows are required
 - separation between private and public documentation
 
@@ -55,9 +55,34 @@ The environment follows a small but explicit model:
 
 ### Remote access
 
-- VPN-based model
-- external publication only by explicit design
-- upstream networking constraints are considered part of the design
+**The model changed in 2026, and the change matters, so it is documented rather
+than rewritten.**
+
+| Before | Now |
+|---|---|
+| Point-to-point tunnel with a self-hosted concentrator | **Overlay mesh with per-node identity** |
+| Required **one inbound port published** on the edge router | **No inbound ports.** Each node dials out to the control plane |
+| A network zone dedicated to remote access | The mesh **is not a zone**: it is a layer above addressing |
+| Implicit authorisation: whoever enters the tunnel enters the network | **Policy as code**: which node reaches which destination, on which port |
+
+**Why it changed:** the previous model forced an open port at the edge, which is
+exactly what the rest of the design avoids. The concentrator was powered off,
+with a rollback point, and **its network segment stopped being advertised**.
+
+Decisions specific to the new model:
+
+- **per-host routes are advertised instead of the whole subnet.** Advertising the
+  whole subnet makes the environment unreachable from any foreign network using
+  the same private range, which is the common case. With per-host routes, the
+  mesh route wins on specificity;
+- **the home gateway is not advertised**, by explicit decision;
+- one node acts as an internet egress for untrusted networks;
+- **the advertised route list is replaced wholesale on every change**, and the
+  internet egress lives inside that same list: re-advertising without including
+  it disables egress **with no error and no alert**. It happened once and is now
+  a written warning;
+- external publication only by explicit design;
+- upstream networking constraints are considered part of the design.
 
 ## Role-aware hardening
 
