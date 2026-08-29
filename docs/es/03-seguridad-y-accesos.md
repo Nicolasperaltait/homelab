@@ -12,7 +12,7 @@ El entorno sigue un modelo pequeno pero explicito:
 - minimo privilegio
 - reduccion de lateralidad
 - administracion no expuesta publicamente
-- acceso remoto bajo patron VPN
+- acceso remoto por malla superpuesta, sin puertos entrantes
 - excepciones documentadas cuando un flujo entre zonas es necesario
 - separacion entre documentacion privada y documentacion publica
 
@@ -55,9 +55,34 @@ El entorno sigue un modelo pequeno pero explicito:
 
 ### Acceso remoto
 
-- modelo basado en VPN
-- publicacion externa solo bajo diseno controlado
-- consideracion explicita de restricciones de conectividad y upstream networking
+**El modelo cambio en 2026 y el cambio importa, asi que queda documentado y no
+reescrito.**
+
+| Antes | Ahora |
+|---|---|
+| Tunel punto a punto con un concentrador propio | **Malla superpuesta con identidad por nodo** |
+| Requeria **un puerto entrante publicado** en el router de borde | **Ningun puerto entrante.** Cada nodo sale hacia el plano de control |
+| Una zona de red dedicada al acceso remoto | La malla **no es una zona**: es una capa por encima del direccionamiento |
+| Autorizacion implicita: quien entra al tunel, entra a la red | **Politica como codigo**: que nodo alcanza que destino, y en que puerto |
+
+**Por que se cambio:** el modelo anterior obligaba a abrir un puerto en el borde,
+que es exactamente lo que el resto del diseno evita. El concentrador quedo
+apagado, con punto de retorno, y **su segmento de red dejo de anunciarse**.
+
+Decisiones propias del modelo nuevo:
+
+- **se anuncian rutas por host y no la subred completa.** Anunciar la subred
+  entera vuelve el entorno inalcanzable desde cualquier red ajena que use el
+  mismo rango privado, que es el caso mas comun. Con rutas por host, la ruta de
+  la malla gana por especificidad;
+- **la puerta de enlace de la red domestica no se anuncia**, por decision
+  explicita;
+- un nodo actua como salida a internet para redes no confiables;
+- **la lista de rutas anunciadas se reemplaza entera en cada cambio**, y la
+  salida a internet vive dentro de esa misma lista: reanunciar sin incluirla la
+  desactiva **sin error y sin alerta**. Paso una vez y quedo como aviso escrito;
+- publicacion externa solo bajo diseno controlado;
+- consideracion explicita de restricciones de conectividad y upstream networking.
 
 ## Hardening por rol
 

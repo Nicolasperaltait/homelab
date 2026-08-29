@@ -111,7 +111,7 @@ Validar:
 | por red funciona, por nombre no | DNS |
 | varios servicios caidos a la vez | hypervisor o red |
 | backup corre pero contenido inconsistente | pipeline, staging o validacion |
-| acceso remoto parcial | VPN, rutas o NAT |
+| acceso remoto parcial | rutas anunciadas, politica de la malla o NAT |
 | servicio web no abre pero VM responde | proxy o aplicacion |
 | dashboard en rojo con servicio sano | metrica, exporter o query |
 
@@ -124,7 +124,7 @@ Validar:
 | Plataforma de apps | contenedores, proxy, recursos |
 | Storage | espacio, shares, directorios de backup |
 | SIEM | servicios principales, agentes e ingesta |
-| VPN | interfaz, handshake, reachability esperada |
+| Acceso remoto | estado del nodo, **rutas anunciadas y aprobadas**, y alcance real al destino esperado |
 | Dashboards | datos reales, frescura y utilidad |
 
 ## Rollback y recuperacion

@@ -20,7 +20,7 @@ Describir la arquitectura del homelab de manera clara, profesional y sanitizada.
 | LAN | administración y acceso base |
 | SERVICES | aplicaciones y servicios internos |
 | SECURITY | seguridad, SIEM y telemetría |
-| VPN | acceso remoto seguro |
+| ~~VPN~~ | ~~acceso remoto seguro~~ — **retirada como zona de red.** Ver el cambio de modelo mas abajo |
 | STORAGE | almacenamiento y backups |
 
 ## Modelo lógico de red
@@ -61,7 +61,7 @@ Eso convierte al host de virtualización en una pieza doblemente crítica:
 | SIEM | plataforma SIEM open-source | visibilidad de eventos y seguridad |
 | Monitoreo | TSDB de métricas + capa de dashboards | salud, métricas y dashboards |
 | NAS | solución NAS open-source | almacenamiento y soporte de backup |
-| VPN | VPN de túnel cifrado moderno | diseño de acceso remoto seguro |
+| Acceso remoto | **malla superpuesta con identidad por nodo** | acceso remoto sin exponer puertos |
 
 ## Dependencias críticas
 

@@ -111,7 +111,7 @@ Validate:
 | network access works, name access fails | DNS |
 | several services fail together | hypervisor or network |
 | backup runs but content is inconsistent | pipeline, staging or validation |
-| remote access is partial | VPN, routes or NAT |
+| remote access is partial | advertised routes, mesh policy or NAT |
 | web service fails but VM responds | proxy or application |
 | dashboard is red while service is healthy | metric, exporter or query |
 
@@ -124,7 +124,7 @@ Validate:
 | Application platform | containers, proxy, resources |
 | Storage | space, shares, backup directories |
 | SIEM | main services, agents and ingestion |
-| VPN | interface, handshake, expected reachability |
+| Remote access | node state, **advertised and approved routes**, and actual reachability to the expected destination |
 | Dashboards | real data, freshness and usefulness |
 
 ## Rollback and recovery
