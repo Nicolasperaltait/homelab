@@ -127,3 +127,83 @@ La seguridad de este homelab no se apoya en una sola herramienta. Se apoya en un
 - operacion disciplinada
 - observabilidad de seguridad
 - documentacion clara y segura
+
+
+---
+
+## Acceso de automatizacion y de agentes de IA
+
+Las cuentas que operan de forma automatizada -incluido un asistente de IA- **no
+comparten el modelo de acceso de la persona**. El criterio es que apagar el
+acceso automatizado no debe apagar el del operador, y viceversa.
+
+| Propiedad | Como se resuelve |
+|---|---|
+| Un solo camino | Todo el acceso automatizado pasa por un host de salto dedicado. No hay acceso directo a los destinos |
+| Interruptor fisico | Ese host **no arranca solo**. Lo enciende el operador desde el hipervisor, fuera del alcance del agente |
+| Credenciales confinadas | Las credenciales hacia el resto viven **solo dentro** del host de salto |
+| Restriccion por origen | Aun filtrada, una credencial no sirve desde otro lugar |
+| Sin reenvio | El host de salto no permite reenvio de puertos ni de agente: con reenvio, la credencial volveria a la estacion del operador |
+| Trazabilidad por cuenta | Los eventos salen al SIEM en el momento, distinguiendo que cuenta hizo cada cosa |
+| Sin via de emergencia | Decision explicita. Si el host de salto esta apagado, se pide encenderlo |
+
+### Lectura privilegiada sin escritura
+
+La mayor parte del trabajo util de una cuenta de automatizacion es **leer**. Un
+permiso acotado a comandos concretos genera friccion constante por operaciones
+inofensivas, y la salida facil -autorizar un lector generico con privilegio- es
+**equivalente a dar acceso total**, porque permite leer el archivo de
+contrasenas.
+
+Se resuelve con un envoltorio propio de solo lectura, con lista de exclusion para
+el material critico, que **normaliza rutas** antes de decidir e **inspecciona
+contenido** en vez de confiar en el nombre del archivo.
+
+### Los permisos se dimensionan midiendo
+
+La lista de comandos privilegiados permitidos **no se disena en abstracto**: sale
+de leer que se invoco realmente. En la revision de 2026 ese ejercicio mostro que
+un permiso amplio concedido "por las dudas" **nunca habia hecho falta**: casi
+todo el uso era lectura, parte no necesitaba privilegio, y quedaban dos acciones
+concretas.
+
+**Una regla que el propio agente cumple voluntariamente no es un control.** Si un
+permiso no se usa, no tiene por que existir.
+
+Detalle en [Caso 05](casos-de-estudio/05-acceso-de-agentes-de-ia-y-minimo-privilegio.md).
+
+---
+
+## Verificacion de controles
+
+Un control que no se prueba es una suposicion documentada.
+
+La practica de este entorno es que **todo script de seguridad comprueba lo que
+tiene que FALLAR**, no solo lo que tiene que funcionar:
+
+- el envoltorio de lectura verifica que **deniega** el archivo de contrasenas,
+  una clave privada y una ruta que intente evadirlo;
+- la reduccion de privilegios verifica que un lector generico y un interprete de
+  comandos **quedan denegados**;
+- la rotacion de credenciales verifica que la credencial **vieja deja de
+  funcionar**, porque crear una nueva no es rotar;
+- el endurecimiento del acceso remoto consulta la **configuracion efectiva** del
+  servicio, no el archivo que se escribio.
+
+El motivo es empirico: en una sola semana de endurecimiento, **siete
+verificaciones informaron un resultado que no correspondia con la realidad**.
+Ninguna fallo por un error de implementacion; todas verificaban la accion en vez
+del efecto.
+
+Detalle en [Caso 06](casos-de-estudio/06-cuando-un-control-no-mide-lo-que-dice-medir.md).
+
+### Retiro de credenciales
+
+Orden innegociable, adoptado despues de perder acceso a un host dos veces:
+
+1. montar el reemplazo;
+2. **probarlo desde donde se va a usar**;
+3. recien entonces retirar el anterior.
+
+Los scripts que retiran un acceso **se niegan a ejecutarse** si el reemplazo no
+esta instalado y verificado.

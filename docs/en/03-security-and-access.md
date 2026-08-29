@@ -127,3 +127,81 @@ Security in this homelab is not based on a single tool. It is based on a combina
 - disciplined operations
 - security observability
 - clear and safe documentation
+
+
+---
+
+## Automation and AI agent access
+
+Accounts that operate automatically -including an AI assistant- **do not share
+the operator's access model**. The criterion is that switching off automated
+access must not switch off the operator's, and the other way around.
+
+| Property | How it is solved |
+|---|---|
+| A single path | All automated access goes through a dedicated jump host. There is no direct access to destinations |
+| Physical off switch | That host **does not start on its own**. The operator powers it on from the hypervisor, outside the agent's reach |
+| Confined credentials | Credentials for the rest of the estate live **only inside** the jump host |
+| Source restriction | Even if leaked, a credential is useless from elsewhere |
+| No forwarding | The jump host allows neither port nor agent forwarding: with forwarding, the credential would effectively be back on the operator's workstation |
+| Per-account traceability | Events reach the SIEM immediately, distinguishing which account did what |
+| No emergency path | Explicit decision. If the jump host is off, ask for it to be powered on |
+
+### Privileged reading without write access
+
+Most of an automation account's useful work is **reading**. A permission list
+scoped to specific commands creates constant friction over harmless operations,
+and the easy way out -authorising a generic reader with privilege- is
+**equivalent to granting full access**, because it can read the password file.
+
+This is solved with a purpose-built read-only wrapper with a deny list for
+critical material, which **normalises paths** before deciding and **inspects
+content** instead of trusting the file name.
+
+### Permissions are sized by measurement
+
+The list of allowed privileged commands **is not designed in the abstract**: it
+comes from reading what was actually invoked. In the 2026 review that exercise
+showed a broad permission granted "just in case" **had never been needed**: most
+use was reading, some of it required no privilege at all, and two concrete
+actions remained.
+
+**A rule the agent follows voluntarily is not a control.** If a permission is not
+used, there is no reason for it to exist.
+
+Detail in [Case 05](case-studies/05-ai-agent-access-under-least-privilege.md).
+
+---
+
+## Control verification
+
+A control that is never tested is a documented assumption.
+
+The practice in this environment is that **every security script checks what has
+to FAIL**, not only what has to work:
+
+- the read wrapper verifies it **denies** the password file, a private key and a
+  path attempting to evade it;
+- privilege reduction verifies a generic reader and a command interpreter **are
+  denied**;
+- credential rotation verifies the **old credential stops working**, because
+  creating a new one is not rotation;
+- remote access hardening queries the service's **effective configuration**, not
+  the file that was written.
+
+The reason is empirical: in a single week of hardening, **seven verifications
+reported a result that did not match reality**. None failed from an
+implementation slip; all of them verified the action instead of the effect.
+
+Detail in [Case 06](case-studies/06-when-a-control-does-not-measure-what-it-claims.md).
+
+### Credential retirement
+
+Non-negotiable order, adopted after losing access to a host twice:
+
+1. put the replacement in place;
+2. **test it from where it will be used**;
+3. only then retire the previous one.
+
+Scripts that retire an access path **refuse to run** if the replacement is not
+installed and verified.
