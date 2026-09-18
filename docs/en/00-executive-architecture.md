@@ -1,97 +1,107 @@
 # 00 - Executive Architecture
 
+> State described: September 2026.
+
 ## Problem
 
-A homelab can easily become a collection of tools without an operating model. This project treats the environment as a small infrastructure platform with security boundaries, operational evidence and recovery expectations.
+A homelab easily becomes a collection of tools with no operating model. This
+project treats the environment as a small infrastructure platform, with security
+boundaries, operational evidence and recovery expectations, run by a single
+person.
 
 The design problem is:
 
-> how to run a realistic internal platform without turning it into an unmanaged, overexposed or undocumented environment.
+> how to operate a realistic internal platform without turning it into a messy,
+> overexposed or unexplainable environment.
 
-## Target architecture
+## Current architecture
 
-The environment is organized around functional zones:
+The environment is organized into functional zones, all anchored on a single
+hypervisor:
 
 - management and control plane
-- internal services
+- internal services and in-house applications
 - security monitoring
-- storage and backup
-- remote access
-- observability
+- storage, backup and recovery
+- remote access through an overlay mesh, **with no inbound ports**
+- automated and AI-agent access, through a single jump host
+- observability and alerting
 
 ```mermaid
 flowchart TB
-    Internet[Internet] -->|No direct admin exposure| Public[Selected public-facing paths]
-    Operator[Trusted operator] --> Mgmt[Management zone]
-    Mgmt --> Hypervisor[Hypervisor / control plane]
+    Internet[Internet] -.->|no inbound port| Edge[Edge router]
+    Operator[Operator] --> Mgmt[Management zone]
+    Remote[Operator away from home] -->|mesh with per-node identity| Gw[Mesh gateway]
+    Gw --> Mgmt
+    Agent[AI agents] -->|single path| Jump[Jump host with a switch]
+    Jump --> Mgmt
 
-    Hypervisor --> Services[Services zone]
-    Hypervisor --> Security[Security zone]
-    Hypervisor --> Storage[Storage and backup zone]
-    Hypervisor --> Remote[Remote access zone]
+    Mgmt --> HV[Hypervisor / control plane]
+    HV --> Services[Services zone]
+    HV --> Security[Security zone]
+    HV --> Storage[Storage and backup]
+    HV --> DR[Recovery]
 
-    Services --> Observability[Metrics and dashboards]
-    Services --> Storage
-    Security --> Evidence[Security and operational evidence]
-    Storage --> Recovery[Recovery practice]
+    Services --> Obs[Metrics, dashboards and alerts]
+    Security --> Evidence[Security evidence]
+    Storage --> Offsite[Encrypted offsite copy]
+    Storage --> DR
 ```
 
 ## Key decisions
 
 | Decision | Why it matters |
 |---|---|
-| Treat the hypervisor as a control plane | it is not only compute; it anchors segmentation, transit and recovery |
-| Keep administrative surfaces private | reduces exposure and keeps trust boundaries understandable |
-| Centralize internal DNS | makes service access consistent and exposes DNS as a managed dependency |
-| Separate monitoring from security visibility | metrics and security evidence answer different questions |
-| Keep backup design recovery-oriented | backup presence is not enough without restore confidence |
-| Publish only sanitized documentation | technical clarity without leaking implementation details |
+| Treat the hypervisor as control plane | it is not just compute: it anchors segmentation, transit and recovery |
+| Remote access with no inbound ports | the previous model required opening the edge, which the rest of the design avoids |
+| A single path for automation | turning off agent access must not turn off the operator's |
+| Centralize internal DNS | consistent access by name, at the cost of a managed dependency |
+| Separate metrics from security evidence | they answer different questions |
+| Alert only on failures | a channel full of confirmations teaches you to ignore it |
+| Measure backups by their content | a recent archive does not prove it holds new data |
+| Own code remote | work history does not depend on an external service |
+| Publish only sanitized documentation | technical clarity without leaking implementation |
 
 ## Tradeoffs
 
 | Tradeoff | Position |
 |---|---|
-| Simplicity vs. feature count | prefer fewer components with clear roles |
-| Segmentation vs. operational convenience | allow cross-zone flows only when justified |
+| Simplicity vs. number of services | fewer components with clear roles; several unused ones were retired |
+| Segmentation vs. convenience | cross-zone flows only when justified and documented |
+| Automate vs. observe | every automated task leaves a metric that shows when it stopped running |
 | Public detail vs. security | publish reasoning, not exact implementation |
-| Dashboard richness vs. signal quality | prefer actionable status over visual noise |
-| Backup automation vs. recovery proof | automation helps, restore testing decides confidence |
+| Automatic patching vs. stability | security patches only, never automatic reboot |
 
 ## Controls
 
-- segmentation by functional role
-- controlled administrative access
-- internal naming and DNS discipline
-- offsite backup strategy documented as a recovery control
-- operational runbook and diagnostic order
-- SIEM-oriented evidence for critical events
-- private evidence repository separated from public documentation
+- segmentation by function on the hypervisor
+- remote access with policy as code and default deny
+- key-only authentication on infrastructure hosts
+- scoped privileged reading for automation, with no generic permissions
+- system auditing on infrastructure hosts
+- automatic, observed security patching
+- backups with a content metric, encrypted offsite copy and restore tests
+- failure alerts to a messaging channel
+- deletions through quarantine with prior verification
 
 ## Residual risks
 
-| Risk | Why it remains relevant |
+| Risk | Why it still matters |
 |---|---|
-| Restore confidence | a system is not mature until restore is tested and documented |
-| DNS dependency | centralized DNS simplifies operations but remains a key dependency |
-| Remote access constraints | upstream networking affects the final design |
-| Alert noise | alerting must stay selective to remain useful |
-| Storage resilience | backup strategy still depends on storage health and recovery paths |
+| Hypervisor dependency | a single host concentrates compute, transit and recovery |
+| DNS with a single resolver | if it fails, many services look down |
+| Storage resilience | a support disk failed and its replacement is postponed |
+| VM-level backup coverage | not every machine has an image backup, only data backup |
+| Restore tests | they exist and worked, but their automatic run is interrupted |
+| Per-host network filtering | applied on most hosts, not all |
 
-## Roadmap
-
-1. Formal restore testing.
-2. Cleaner alert routing and escalation.
-3. SIEM-backed operational evidence.
-4. DNS redundancy.
-5. Role-aware hardening v2.
-6. More executive architecture diagrams and case studies.
-
-## Architecture reading
+## Reading the architecture
 
 This project should be read as an architecture and operations record:
 
-- boundaries and dependencies are explicit
-- tradeoffs and residual risks are documented
-- backup is treated as recovery, not file generation
-- public documentation is separated from private operational evidence
-- each component has a documented reason to exist
+- explicit boundaries and dependencies
+- documented tradeoffs and residual risks, including the open ones
+- backup treated as recovery, not as file generation
+- public documentation separated from private operational evidence
+- every component has a documented reason to exist, and those that lost it
+  were retired

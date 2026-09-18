@@ -1,234 +1,189 @@
 # 03 - Seguridad y Accesos
 
+> Estado descrito: septiembre de 2026.
+
 ## Proposito
 
 Documentar el enfoque de seguridad del homelab sin exponer detalles sensibles.
 
 ## Modelo de seguridad
 
-El entorno sigue un modelo pequeno pero explicito:
-
 - segmentacion por rol
-- minimo privilegio
-- reduccion de lateralidad
+- minimo privilegio, dimensionado midiendo el uso real
 - administracion no expuesta publicamente
-- acceso remoto por malla superpuesta, sin puertos entrantes
+- **ningun puerto entrante en el borde**
+- acceso automatizado separado del acceso del operador
 - excepciones documentadas cuando un flujo entre zonas es necesario
-- separacion entre documentacion privada y documentacion publica
-
-## Principios aplicados
-
-| Principio | Aplicacion |
-|---|---|
-| Minimo privilegio | accesos administrativos controlados |
-| Segmentacion | separacion de zonas con proposito |
-| Seguridad por diseno | servicios criticos no expuestos |
-| Excepciones documentadas | flujos permitidos solo por necesidad funcional |
-| Hardening por rol | no todos los hosts reciben el mismo tratamiento |
-| Sanitizacion publica | publicar intencion y criterio, no implementacion sensible |
+- **todo control se verifica haciendolo fallar**
+- separacion entre documentacion privada y publica
 
 ## Que no se publica
 
-- claves privadas
-- secretos
-- tokens
-- credenciales
+- claves, secretos, tokens y credenciales
 - endpoints reales de administracion
-- configuracion completa de VPN
+- configuracion de la malla, del firewall, del SIEM o del monitoreo
 - rutas internas de backups o logs
-- configuraciones completas de firewall, SIEM o monitoreo
-- detalles sensibles del sistema de backup offsite
+- destinos y detalles de la copia fuera del sitio
 
 ## Accesos
 
 ### Acceso administrativo
 
-- acceso directo solo desde origen autorizado
-- prioridad a SSH y paneles internos bajo control
-- sin publicacion directa a Internet de interfaces administrativas
+- SSH **solo por clave** en los hosts de infraestructura; la autenticacion por
+  contrasena esta deshabilitada y verificada contra la configuracion efectiva
+- rescate por consola del hipervisor verificado, para no depender de la red
+- sin publicacion a Internet de ninguna interfaz administrativa
+- cuentas en desuso retiradas, con el orden: reemplazo, prueba, retiro
 
-### Acceso de aplicaciones
+### Acceso a aplicaciones
 
-- preferencia por nombres internos
-- reverse proxy para servicios web seleccionados
-- puertos directos solo cuando existe justificacion operativa
+- servicios internos por nombre, a traves de un proxy inverso
+- las aplicaciones propias escuchan solo en la interfaz local de su host y se
+  alcanzan por tunel; nunca se publican
 
 ### Acceso remoto
 
-**El modelo cambio en 2026 y el cambio importa, asi que queda documentado y no
-reescrito.**
+**El modelo cambio en 2026.**
 
 | Antes | Ahora |
 |---|---|
-| Tunel punto a punto con un concentrador propio | **Malla superpuesta con identidad por nodo** |
-| Requeria **un puerto entrante publicado** en el router de borde | **Ningun puerto entrante.** Cada nodo sale hacia el plano de control |
-| Una zona de red dedicada al acceso remoto | La malla **no es una zona**: es una capa por encima del direccionamiento |
-| Autorizacion implicita: quien entra al tunel, entra a la red | **Politica como codigo**: que nodo alcanza que destino, y en que puerto |
+| Tunel punto a punto con concentrador propio | **Malla superpuesta con identidad por nodo** |
+| Un puerto entrante publicado en el router de borde | **Ningun puerto entrante**: cada nodo sale hacia el plano de control |
+| Una zona de red dedicada | Una capa por encima del direccionamiento, sin zona propia |
+| Quien entra al tunel, entra a la red | **Politica como codigo**, denegacion por defecto, permisos por puerto |
 
-**Por que se cambio:** el modelo anterior obligaba a abrir un puerto en el borde,
-que es exactamente lo que el resto del diseno evita. El concentrador quedo
-apagado, con punto de retorno, y **su segmento de red dejo de anunciarse**.
+**Por que se cambio:** el modelo anterior obligaba a abrir el borde, que es lo
+que el resto del diseno evita. El concentrador se dio de baja y su segmento dejo
+de anunciarse.
 
-Decisiones propias del modelo nuevo:
+Decisiones del modelo actual:
 
-- **se anuncian rutas por host y no la subred completa.** Anunciar la subred
-  entera vuelve el entorno inalcanzable desde cualquier red ajena que use el
-  mismo rango privado, que es el caso mas comun. Con rutas por host, la ruta de
-  la malla gana por especificidad;
-- **la puerta de enlace de la red domestica no se anuncia**, por decision
-  explicita;
-- un nodo actua como salida a internet para redes no confiables;
-- **la lista de rutas anunciadas se reemplaza entera en cada cambio**, y la
-  salida a internet vive dentro de esa misma lista: reanunciar sin incluirla la
-  desactiva **sin error y sin alerta**. Paso una vez y quedo como aviso escrito;
-- publicacion externa solo bajo diseno controlado;
-- consideracion explicita de restricciones de conectividad y upstream networking.
+- **rutas por host, no la subred completa.** Anunciar la subred vuelve el
+  entorno inalcanzable desde redes ajenas que usan el mismo rango privado, que
+  es el caso mas comun;
+- la puerta de enlace domestica no se anuncia;
+- un nodo sirve de salida a internet para redes no confiables;
+- **la lista de rutas se reemplaza entera en cada cambio**, y la salida a
+  internet vive en esa lista: reanunciar sin incluirla la desactiva sin error ni
+  alerta. Paso una vez y quedo como aviso escrito;
+- **bloqueo de la malla con nodos firmantes**: un equipo nuevo no entra aunque
+  tenga credenciales validas si un nodo firmante no lo autoriza;
+- la publicacion de servicios hacia internet que ofrece la malla esta prohibida;
+- las claves de nodo vencen; el vencimiento esta registrado con fecha para que
+  no caduquen todas juntas;
+- una auditoria periodica del estado de la malla emite una metrica, y la alerta
+  avisa si **deja de correr**.
 
 ## Hardening por rol
 
-Una leccion importante del proyecto es que un hardening generico no sirve para todos los hosts.
+Un hardening generico no sirve para todos los hosts.
 
-| Tipo de host | Enfoque recomendado |
+| Tipo de host | Enfoque |
 |---|---|
-| DNS interno | permitir puertos funcionales de resolucion y administracion minima |
-| NAS / storage | proteger shares y paneles segun origen |
-| SIEM | exponer solo puertos requeridos para dashboard y agentes |
-| Host de contenedores | tratamiento especial por networking, bridge y proxy |
-| Hypervisor | control fino de firewall, forwarding y transito |
+| DNS interno | puertos de resolucion y administracion minima |
+| NAS / storage | shares y paneles segun origen |
+| SIEM | solo los puertos del dashboard y de los agentes |
+| Host de contenedores | tratamiento especial: un firewall generico rompe la red de contenedores y el proxy |
+| Hipervisor | control fino de firewall, reenvio y transito |
+| Puerta de la malla | reenvia trafico por diseno; su control es la politica de la malla |
 
-## Flujos legitimos entre zonas
+**Hallazgo de 2026:** al relevar el filtrado para instalar una herramienta nueva,
+la mayoria de los hosts **ya filtraban** y no estaba documentado. El plan cambio:
+se completa el filtrado donde falta, con la herramienta que cada host ya usa.
 
-Hay casos donde una zona debe hablar con otra. Eso no contradice la segmentacion; la vuelve realista.
+## Parcheo
 
-Criterio:
+- parches de seguridad automaticos en los hosts Linux, **sin reinicio
+  automatico**: si un parche lo pide, queda senalado para una ventana atendida
+- ventana de parcheo antes de la de backups, para no competir por disco
+- imagenes de contenedores actualizadas semanalmente con prueba de salud y
+  **reversion automatica** a la imagen anterior
+- los servicios mas sensibles se excluyen de la actualizacion automatica y se
+  actualizan a mano con backup previo verificado
+- cada tarea deja una metrica: **automatizar sin observar es no automatizar**.
+  El primer relevamiento encontro el parcheo automatico deshabilitado justo en
+  el host de seguridad, sin que nada lo indicara
 
-- permitir solo el flujo necesario
-- documentar por que existe
-- validar impacto operativo
-- revisarlo periodicamente
-- no publicar reglas reales ni origen/destino exactos
+## Acceso de automatizacion y de agentes de IA
 
-## Seguridad como evidencia operativa
+Las cuentas automatizadas, incluidos los asistentes de IA, **no comparten el
+modelo de acceso de la persona**. Apagar uno no debe apagar el otro.
 
-El SIEM no se usa solo como herramienta de visualizacion. Su rol esperado es registrar eventos relevantes para operacion y seguridad, por ejemplo:
+| Propiedad | Como se resuelve |
+|---|---|
+| Un solo camino | todo el acceso automatizado pasa por un host de salto dedicado |
+| Interruptor manual | ese host **no arranca solo**: lo enciende el operador desde el hipervisor |
+| Credenciales confinadas | las credenciales hacia el resto viven solo dentro del host de salto |
+| Restriccion por origen | una credencial filtrada no sirve desde otro lugar |
+| Sin reenvio | ni de puertos ni de agente |
+| Trazabilidad por cuenta | los eventos van al SIEM distinguiendo que cuenta hizo cada cosa |
+| Acceso de solo lectura al codigo | el agente lee el remoto de codigo con un token de solo lectura que vive en el host de salto; la escritura esta probada como rechazada |
+| Sin via de emergencia | decision explicita: si el host esta apagado, se pide encenderlo |
 
-- fallos de backup
-- cambios en componentes criticos
-- agentes desconectados
-- eventos de autenticacion relevantes
-- alertas que requieren accion humana
+### Lectura privilegiada sin escritura
 
-En la version publica se describe el patron, no las reglas reales ni eventos crudos.
+La mayor parte del trabajo util de un agente es **leer**. Autorizar un lector
+generico con privilegio equivale a dar acceso total, porque permite leer el
+archivo de contrasenas. Se resuelve con un envoltorio propio de solo lectura, con
+lista de exclusion para material critico, que normaliza rutas e inspecciona
+contenido en vez de confiar en el nombre del archivo.
+
+**Ningun host tiene un permiso privilegiado generico**, tampoco el de salto. La
+lista de comandos permitidos salio de medir que se invocaba realmente. Detalle
+en [Caso 05](casos-de-estudio/05-acceso-de-agentes-de-ia-y-minimo-privilegio.md).
+
+## Verificacion de controles
+
+Un control que no se prueba es una suposicion documentada. Todo script de
+seguridad comprueba **lo que tiene que fallar**:
+
+- el envoltorio de lectura verifica que deniega el archivo de contrasenas, una
+  clave privada y una ruta que intenta evadirlo;
+- la reduccion de privilegios verifica que un lector generico y un interprete
+  quedan denegados;
+- la rotacion verifica que la credencial vieja **deja de funcionar**;
+- el endurecimiento de SSH consulta la configuracion efectiva, no el archivo.
+
+En una sola semana, **siete verificaciones informaron un resultado que no
+correspondia con la realidad**. Detalle en [Caso 06](casos-de-estudio/06-cuando-un-control-no-mide-lo-que-dice-medir.md).
+
+## Auditoria y SIEM
+
+- auditoria del sistema activa en los hosts de infraestructura
+- agentes del SIEM en los hosts y en la estacion de trabajo del operador
+- el SIEM registra fallos de backup, agentes desconectados y eventos de
+  autenticacion como **evidencia**, no como dashboard
 
 ## Riesgos conocidos
 
 | Riesgo | Mitigacion actual | Pendiente |
 |---|---|---|
-| Punto unico de falla DNS | DNS interno central | redundancia DNS |
-| Acceso remoto limitado por conectividad | diseno VPN local | relay o mejora de salida |
-| Recuperacion no completamente demostrada | backups y DRP documentados | restore test real |
-| Alertas con demasiado ruido | criterio de alertas accionables | refinamiento continuo |
-| Complejidad creciente | runbook y documentacion | revision continua de alcance |
+| DNS con un solo resolver | resolver central monitoreado | segundo resolver |
+| Filtrado por host incompleto | aplicado en la mayoria de los hosts | completar los restantes |
+| Aplicaciones propias sin autenticacion propia | solo alcanzables por tunel | agregar autenticacion |
+| SIEM ruidoso y sin la auditoria del sistema | eventos criticos identificados | subir el umbral e ingerir la auditoria |
+| Endurecimiento de los equipos del operador | claves por equipo y bloqueo de la malla | completar el endurecimiento |
 
 ## Threat model lite
 
 ```mermaid
 flowchart TD
-    A[Internet] -->|No acceso admin directo| B[Servicios expuestos por diseno]
-    C[Cliente interno] --> D[DNS interno]
-    C --> E[Aplicaciones internas]
-    C --> F[Paneles administrativos autorizados]
-    G[VPN] --> C
-    H[Actor no autorizado] -.->|bloqueado o no publicado| F
+    A[Internet] -.->|ningun puerto entrante| B[Borde]
+    C[Operador en casa] --> D[DNS interno]
+    C --> E[Servicios internos]
+    C --> F[Paneles administrativos]
+    M[Operador fuera de casa] -->|malla, politica por puerto| C
+    J[Agentes de IA] -->|host de salto encendido a mano| F
+    H[Actor no autorizado] -.->|no publicado| F
+    N[Equipo nuevo en la malla] -.->|sin firma, no entra| C
 ```
 
 ## Idea central
 
-La seguridad de este homelab no se apoya en una sola herramienta. Se apoya en una combinacion de:
+La seguridad de este homelab no se apoya en una herramienta. Se apoya en:
 
-- segmentacion
-- publicacion controlada
-- endurecimiento segun rol
-- operacion disciplinada
-- observabilidad de seguridad
-- documentacion clara y segura
-
-
----
-
-## Acceso de automatizacion y de agentes de IA
-
-Las cuentas que operan de forma automatizada -incluido un asistente de IA- **no
-comparten el modelo de acceso de la persona**. El criterio es que apagar el
-acceso automatizado no debe apagar el del operador, y viceversa.
-
-| Propiedad | Como se resuelve |
-|---|---|
-| Un solo camino | Todo el acceso automatizado pasa por un host de salto dedicado. No hay acceso directo a los destinos |
-| Interruptor fisico | Ese host **no arranca solo**. Lo enciende el operador desde el hipervisor, fuera del alcance del agente |
-| Credenciales confinadas | Las credenciales hacia el resto viven **solo dentro** del host de salto |
-| Restriccion por origen | Aun filtrada, una credencial no sirve desde otro lugar |
-| Sin reenvio | El host de salto no permite reenvio de puertos ni de agente: con reenvio, la credencial volveria a la estacion del operador |
-| Trazabilidad por cuenta | Los eventos salen al SIEM en el momento, distinguiendo que cuenta hizo cada cosa |
-| Sin via de emergencia | Decision explicita. Si el host de salto esta apagado, se pide encenderlo |
-
-### Lectura privilegiada sin escritura
-
-La mayor parte del trabajo util de una cuenta de automatizacion es **leer**. Un
-permiso acotado a comandos concretos genera friccion constante por operaciones
-inofensivas, y la salida facil -autorizar un lector generico con privilegio- es
-**equivalente a dar acceso total**, porque permite leer el archivo de
-contrasenas.
-
-Se resuelve con un envoltorio propio de solo lectura, con lista de exclusion para
-el material critico, que **normaliza rutas** antes de decidir e **inspecciona
-contenido** en vez de confiar en el nombre del archivo.
-
-### Los permisos se dimensionan midiendo
-
-La lista de comandos privilegiados permitidos **no se disena en abstracto**: sale
-de leer que se invoco realmente. En la revision de 2026 ese ejercicio mostro que
-un permiso amplio concedido "por las dudas" **nunca habia hecho falta**: casi
-todo el uso era lectura, parte no necesitaba privilegio, y quedaban dos acciones
-concretas.
-
-**Una regla que el propio agente cumple voluntariamente no es un control.** Si un
-permiso no se usa, no tiene por que existir.
-
-Detalle en [Caso 05](casos-de-estudio/05-acceso-de-agentes-de-ia-y-minimo-privilegio.md).
-
----
-
-## Verificacion de controles
-
-Un control que no se prueba es una suposicion documentada.
-
-La practica de este entorno es que **todo script de seguridad comprueba lo que
-tiene que FALLAR**, no solo lo que tiene que funcionar:
-
-- el envoltorio de lectura verifica que **deniega** el archivo de contrasenas,
-  una clave privada y una ruta que intente evadirlo;
-- la reduccion de privilegios verifica que un lector generico y un interprete de
-  comandos **quedan denegados**;
-- la rotacion de credenciales verifica que la credencial **vieja deja de
-  funcionar**, porque crear una nueva no es rotar;
-- el endurecimiento del acceso remoto consulta la **configuracion efectiva** del
-  servicio, no el archivo que se escribio.
-
-El motivo es empirico: en una sola semana de endurecimiento, **siete
-verificaciones informaron un resultado que no correspondia con la realidad**.
-Ninguna fallo por un error de implementacion; todas verificaban la accion en vez
-del efecto.
-
-Detalle en [Caso 06](casos-de-estudio/06-cuando-un-control-no-mide-lo-que-dice-medir.md).
-
-### Retiro de credenciales
-
-Orden innegociable, adoptado despues de perder acceso a un host dos veces:
-
-1. montar el reemplazo;
-2. **probarlo desde donde se va a usar**;
-3. recien entonces retirar el anterior.
-
-Los scripts que retiran un acceso **se niegan a ejecutarse** si el reemplazo no
-esta instalado y verificado.
+- ninguna exposicion entrante
+- segmentacion y minimo privilegio medido
+- automatizacion separada del operador
+- controles probados haciendolos fallar
+- evidencia, y honestidad sobre lo que sigue abierto

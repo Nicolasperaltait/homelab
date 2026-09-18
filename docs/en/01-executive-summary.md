@@ -1,109 +1,100 @@
 # 01 - Executive Summary
 
-## Objective
+> State described: September 2026.
 
-This document summarizes the homelab from an executive and technical perspective. The public version is designed to show architecture, operations, security and recovery judgment without exposing sensitive implementation details.
+## Goal
+
+This document summarizes the homelab at an executive and technical level. The
+public version shows architecture, operations, security and recovery judgment
+without exposing data that would allow mapping or reproducing the real
+environment.
 
 ## Overview
 
-The homelab was designed as a practical environment for infrastructure, cybersecurity and daily operations. The goal is not to accumulate services, but to demonstrate the ability to:
+The homelab is a practice environment for infrastructure and cybersecurity that
+also runs daily-use services: in-house applications, the code remote and the
+workstation backups. The goal is not to accumulate services, but to demonstrate
+the ability to:
 
 - design a segmented architecture
-- operate services with discipline
-- reduce unnecessary exposure
-- centralize internal resolution
-- observe the environment with useful dashboards
-- back up and recover critical components
-- document decisions, incidents and limits
+- operate services with judgment and retire those that are not used
+- reduce exposure: no inbound port at the edge
+- observe the environment and get notified only when something fails
+- back up, restore and **test** the restore
+- work with AI agents under least privilege
+- document decisions, incidents and limits, including one's own mistakes
 
-## Public / private split
+## Public / private separation
 
 | Layer | Purpose |
 |---|---|
-| Private documentation | real operations, evidence, incidents, paths, scripts, errors and critical data |
+| Private documentation | real operations, evidence, incidents, paths, scripts and critical data |
 | Public repository | sanitized version for technical explanation and architecture review |
 
-Real operational information is not copied directly into the public repository. It is transformed first into patterns, decisions and lessons without identifiable details.
-
-## What this project demonstrates
-
-| Capability | How it appears in the repo |
-|---|---|
-| Architecture | zones, dependencies and controlled publication |
-| Operations | runbook, periodic checks and scenario-based troubleshooting |
-| Security | least privilege, private admin surfaces and role-aware hardening |
-| Observability | separation between operational metrics and security visibility |
-| Continuity | backup model, offsite strategy and recovery as a maturity milestone |
-| Technical communication | clear, sanitized and defensible documentation |
+Real operational information is not copied into the public repository. It is
+first transformed into patterns, decisions and lessons with no identifying data.
 
 ## Main components
 
 | Layer | Function |
 |---|---|
-| Hypervisor | virtualization, transit between segments and central control point |
-| Internal DNS | centralized resolution and consistent access |
-| Application platform | host for internal services |
-| Security | SIEM and event telemetry |
-| Monitoring | metrics, dashboards and operational visibility |
-| Storage | data repository and backup target |
-| Remote access | secure access design under a VPN model |
+| Hypervisor | virtualization, transit between segments, central control point |
+| Internal DNS | centralized resolution and filtering, served to the whole network |
+| Container platform | in-house applications, observability and reverse proxy |
+| Code remote | own repositories with continuous integration, at home |
+| Security | SIEM with agents on the hosts and on the workstation |
+| Observability | metrics, dashboards and failure alerts to a messaging channel |
+| Storage | NAS with backups, workstation mirror and encrypted offsite copy |
+| Recovery | machine dedicated to test restores, isolated from production |
+| Remote access | overlay mesh with per-node identity and a dedicated gateway |
+| Automated access | jump host for AI agents, with a manual switch |
 
 ## Current state
 
-### Solved
+### Working and verified
 
-- logical segmentation by zones
-- centralized internal DNS
-- operational application platform
-- baseline observability
-- documented and validated backup strategy and offsite recovery model (backup window confirmed across multiple consecutive cycles with automated evidence)
-- SIEM agent inventory completed; decommissioned hosts removed from the manager
-- NOC display node operational: internal DNS resolution and kiosk mode validated
-- operational access profiles standardized by role (admin / operator)
-- operational dashboard approach
-- public documentation separated from private documentation
+- logical segmentation by zone on the hypervisor
+- remote access through the mesh, with no inbound ports and policy as code
+- key-only SSH and system auditing on infrastructure hosts
+- AI-agent access through a single jump host, with scoped privileged reading
+- automatic security patching on Linux hosts and weekly container image updates
+  with automatic rollback
+- failure alerts to a messaging channel (late backups, exporters down, failing
+  probes, unapplied patches)
+- backup chain rebuilt with a content-age metric, not an archive-age one
+- encrypted nightly backup of the workstation configuration, with an alert
+- encrypted offsite copy, verified by metric
+- own code remote with continuous integration
+- two in-house web applications in production, deployed from commits
+- workstation migration tested on a clean machine
 
-### Maturing
+### Open, with known risk
 
-- formal restore tests (active critical path)
-- more actionable operational alerts (Discord / notifications)
-- SIEM evidence for critical backup events
-- DNS redundancy
-- remote access improvements under connectivity constraints
-- role-aware hardening v2
-
-## Simplified logical topology
-
-```mermaid
-flowchart LR
-    A[Operations Workstation] --> B[Internal DNS]
-    A --> C[Hypervisor]
-    C --> D[Services Zone]
-    C --> E[Security Zone]
-    C --> F[VPN Zone]
-    C --> G[Storage / NAS]
-
-    D --> H[Internal Applications]
-    D --> I[Reverse Proxy]
-    D --> J[Monitoring]
-
-    E --> K[SIEM]
-    F --> L[Secure Remote Access]
-```
+- the automatic restore test run is interrupted; resume it
+- two machines that do not start on their own after a hypervisor reboot
+- image-level backup for machines that today only back up data
+- offsite copy of the code remote
+- a second DNS resolver
+- replacing a support disk that failed
+- completing per-host network filtering
+- built-in authentication for the web applications (today reachable only by tunnel)
+- reducing SIEM noise and ingesting system auditing
 
 ## Canonical project state
 
-| Area | Status |
+| Aspect | State |
 |---|---|
 | Architecture | stable and documented |
-| Baseline security | applied with a role-aware approach |
-| Observability | functional and improving |
-| Backups | operational, documented and validated with automated evidence |
-| Recovery | window validated; formal restore test pending (active critical path) |
-| Public documentation | sanitized and technically defensible |
+| Access | no inbound exposure; automation separated from the operator |
+| Observability | working; alerts only on failures |
+| Backups | operational and measured by content, with offsite copy |
+| Recovery | tested with measured RTO; periodic run to be resumed |
+| Public documentation | sanitized and updated to September 2026 |
 
-## Correct reading
+## The right reading
 
-This homelab is not trying to look enterprise through decoration. It is trying to show something more serious:
+This homelab does not try to look enterprise through decoration. It tries to
+show something more serious:
 
-> a small, reasoned, operable and explainable infrastructure.
+> a small infrastructure that is reasoned, operable, explainable, and honest
+> about what is not solved yet.

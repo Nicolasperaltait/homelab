@@ -1,97 +1,107 @@
 # 00 - Arquitectura Ejecutiva
 
+> Estado descrito: septiembre de 2026.
+
 ## Problema
 
-Un homelab puede convertirse facilmente en una coleccion de herramientas sin modelo operativo. Este proyecto trata el entorno como una plataforma pequena de infraestructura, con limites de seguridad, evidencia operativa y expectativas de recuperacion.
+Un homelab puede convertirse facilmente en una coleccion de herramientas sin
+modelo operativo. Este proyecto trata el entorno como una plataforma pequena de
+infraestructura, con limites de seguridad, evidencia operativa y expectativas de
+recuperacion, operada por una sola persona.
 
 El problema de diseno es:
 
-> como operar una plataforma interna realista sin convertirla en un entorno desordenado, sobreexpuesto o imposible de explicar.
+> como operar una plataforma interna realista sin convertirla en un entorno
+> desordenado, sobreexpuesto o imposible de explicar.
 
-## Arquitectura objetivo
+## Arquitectura vigente
 
-El entorno se organiza alrededor de zonas funcionales:
+El entorno se organiza en zonas funcionales, todas ancladas en un unico
+hipervisor:
 
 - administracion y control plane
-- servicios internos
+- servicios internos y aplicaciones propias
 - monitoreo de seguridad
-- storage y backup
-- acceso remoto
-- observabilidad
+- storage, backup y recuperacion
+- acceso remoto por malla superpuesta, **sin puertos entrantes**
+- acceso automatizado y de agentes de IA, por un unico host de salto
+- observabilidad y alertas
 
 ```mermaid
 flowchart TB
-    Internet[Internet] -->|Sin exposicion admin directa| Publico[Rutas publicas seleccionadas]
-    Operador[Operador confiable] --> Mgmt[Zona de administracion]
-    Mgmt --> Hypervisor[Hypervisor / control plane]
+    Internet[Internet] -.->|ningun puerto entrante| Borde[Router de borde]
+    Operador[Operador] --> Mgmt[Zona de administracion]
+    Remoto[Operador fuera de casa] -->|malla con identidad por nodo| Gw[Puerta de la malla]
+    Gw --> Mgmt
+    Agente[Agentes de IA] -->|unico camino| Salto[Host de salto con interruptor]
+    Salto --> Mgmt
 
-    Hypervisor --> Servicios[Zona de servicios]
-    Hypervisor --> Seguridad[Zona de seguridad]
-    Hypervisor --> Storage[Zona storage y backup]
-    Hypervisor --> Remoto[Zona acceso remoto]
+    Mgmt --> HV[Hipervisor / control plane]
+    HV --> Servicios[Zona de servicios]
+    HV --> Seguridad[Zona de seguridad]
+    HV --> Storage[Storage y backup]
+    HV --> DR[Recuperacion]
 
-    Servicios --> Observabilidad[Metricas y dashboards]
-    Servicios --> Storage
-    Seguridad --> Evidencia[Evidencia operativa y seguridad]
-    Storage --> Recuperacion[Practica de recuperacion]
+    Servicios --> Obs[Metricas, dashboards y alertas]
+    Seguridad --> Evidencia[Evidencia de seguridad]
+    Storage --> Offsite[Copia cifrada fuera del sitio]
+    Storage --> DR
 ```
 
 ## Decisiones clave
 
 | Decision | Por que importa |
 |---|---|
-| Tratar el hypervisor como control plane | no es solo computo; ancla segmentacion, transito y recuperacion |
-| Mantener privadas las superficies administrativas | reduce exposicion y vuelve entendibles los limites de confianza |
-| Centralizar DNS interno | hace consistente el acceso y convierte DNS en dependencia gestionada |
-| Separar monitoreo de visibilidad de seguridad | metricas y evidencia de seguridad responden preguntas distintas |
-| Orientar backups a recuperacion | tener archivos no alcanza sin confianza de restore |
-| Publicar solo documentacion sanitizada | claridad tecnica sin filtrar implementacion sensible |
+| Tratar el hipervisor como control plane | no es solo computo: ancla segmentacion, transito y recuperacion |
+| Acceso remoto sin puertos entrantes | el modelo anterior obligaba a abrir el borde, que es lo que el resto del diseno evita |
+| Un unico camino para la automatizacion | apagar el acceso de los agentes no debe apagar el del operador |
+| Centralizar DNS interno | acceso consistente por nombre, a cambio de una dependencia gestionada |
+| Separar metricas de evidencia de seguridad | responden preguntas distintas |
+| Alertar solo fallos | un canal lleno de confirmaciones ensena a ignorarlo |
+| Backups medidos por su contenido | un archivo reciente no prueba que tenga datos nuevos |
+| Remoto de codigo propio | el historial de trabajo no depende de un servicio externo |
+| Publicar solo documentacion sanitizada | claridad tecnica sin filtrar implementacion |
 
 ## Tradeoffs
 
 | Tradeoff | Posicion |
 |---|---|
-| Simplicidad vs. cantidad de servicios | preferir menos componentes con roles claros |
-| Segmentacion vs. comodidad operativa | permitir flujos entre zonas solo si estan justificados |
+| Simplicidad vs. cantidad de servicios | menos componentes con roles claros; se dieron de baja varios que no se usaban |
+| Segmentacion vs. comodidad | flujos entre zonas solo si estan justificados y documentados |
+| Automatizar vs. observar | toda tarea automatica deja una metrica que permita notar que dejo de correr |
 | Detalle publico vs. seguridad | publicar razonamiento, no implementacion exacta |
-| Dashboard vistoso vs. senal accionable | priorizar estado util sobre ruido visual |
-| Automatizacion de backup vs. prueba de recuperacion | automatizar ayuda, pero restore define confianza |
+| Parcheo automatico vs. estabilidad | solo parches de seguridad, nunca reinicio automatico |
 
 ## Controles
 
-- segmentacion por funcion
-- acceso administrativo controlado
-- disciplina de nombres internos y DNS
-- estrategia offsite documentada como control de recuperacion
-- runbook operativo y orden de diagnostico
-- evidencia de eventos criticos via SIEM
-- separacion entre evidencia privada y documentacion publica
+- segmentacion por funcion en el hipervisor
+- acceso remoto con politica como codigo y denegacion por defecto
+- autenticacion solo por clave en los hosts de infraestructura
+- lectura privilegiada acotada para la automatizacion, sin permisos genericos
+- auditoria del sistema en los hosts de infraestructura
+- parcheo de seguridad automatico y observado
+- backups con metrica de contenido, copia cifrada fuera del sitio y pruebas de restauracion
+- alertas de fallo a un canal de mensajeria
+- borrados con cuarentena y verificacion previa
 
 ## Riesgos residuales
 
 | Riesgo | Por que sigue importando |
 |---|---|
-| Confianza de restore | un sistema no madura hasta probar y documentar recuperacion |
-| Dependencia DNS | DNS centralizado simplifica, pero queda como dependencia clave |
-| Restricciones de acceso remoto | la conectividad upstream condiciona el diseno final |
-| Ruido de alertas | alertar demasiado destruye utilidad |
-| Resiliencia de storage | backup depende de salud de storage y caminos de recuperacion |
-
-## Roadmap
-
-1. Restore tests formales.
-2. Ruteo y escalamiento de alertas mas claro.
-3. Evidencia operativa respaldada por SIEM.
-4. Redundancia DNS.
-5. Hardening v2 por rol.
-6. Mas diagramas ejecutivos y case studies.
+| Dependencia del hipervisor | un unico host concentra computo, transito y recuperacion |
+| DNS con un solo resolver | si cae, muchos servicios parecen caidos |
+| Resiliencia de storage | un disco de soporte fallo y su reemplazo esta postergado |
+| Cobertura de backup a nivel VM | no todas las maquinas tienen respaldo de imagen, solo de datos |
+| Pruebas de restauracion | existen y funcionaron, pero su corrida automatica esta interrumpida |
+| Filtrado de red por host | aplicado en la mayoria de los hosts, no en todos |
 
 ## Lectura de arquitectura
 
 Este proyecto debe leerse como registro de arquitectura y operacion:
 
 - limites y dependencias explicitos
-- tradeoffs y riesgos residuales documentados
+- tradeoffs y riesgos residuales documentados, incluidos los que siguen abiertos
 - backup tratado como recuperacion, no como generacion de archivos
 - documentacion publica separada de evidencia operativa privada
-- cada componente tiene una razon documentada para existir
+- cada componente tiene una razon documentada para existir, y los que la
+  perdieron se dieron de baja

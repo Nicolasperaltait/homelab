@@ -1,34 +1,51 @@
 # 07 - Decisiones Arquitectonicas
 
+> Estado descrito: septiembre de 2026.
+
 ## Proposito
 
-Este documento resume las decisiones principales detras del diseno publico del homelab. Esta pensado para revision tecnica y reutilizacion.
+Resumir las decisiones principales detras del diseno, con su razonamiento, su
+costo y donde se documentan.
 
 ## Matriz de decisiones
 
-| Decision | Razonamiento | Tradeoff | Evidencia publica |
+| Decision | Razonamiento | Tradeoff | Donde se ve |
 |---|---|---|---|
-| Segmentar por funcion | reduce ambiguedad y lateralidad innecesaria | requiere disenar rutas y accesos | docs de arquitectura y seguridad |
-| Tratar hypervisor como control plane | computo, transito y recuperacion dependen de el | vuelve sensibles los cambios en hypervisor | arquitectura ejecutiva |
-| Mantener privadas las superficies admin | reduce superficie de ataque | exige disciplina de acceso interno | modelo de seguridad |
-| Centralizar DNS interno | mejora consistencia de acceso | crea dependencia que debe monitorearse | docs de arquitectura |
-| Tratar hosts de contenedores distinto | firewall generico puede romper bridge/proxy | requiere hardening por rol | docs de seguridad |
-| Separar dashboards de SIEM | metricas y evidencia de seguridad tienen trabajos distintos | hay dos caminos de visibilidad | docs de observabilidad |
-| Tratar offsite como camino cifrado de recuperacion | protege datos fuera del storage local | la config de recuperacion se vuelve critica | docs de backup |
-| Mantener docs publicas sanitizadas | claridad tecnica sin exponer el lab | menos detalle de implementacion publica | README y docs publicas |
+| Segmentar por funcion en el hipervisor | reduce ambiguedad y lateralidad | requiere disenar rutas y accesos | 02 |
+| Tratar el hipervisor como control plane | computo, transito y recuperacion dependen de el | sus cambios son sensibles | 00, 02 |
+| Acceso remoto por malla sin puertos entrantes | el borde queda cerrado | dependencia de un plano de control externo | 03 |
+| Rutas por host en la malla | funciona desde redes ajenas con el mismo rango | mas entradas que mantener | 03 |
+| Bloqueo de la malla con nodos firmantes | una credencial valida no alcanza para entrar | el alta de un equipo exige un paso extra | 03 |
+| Un unico camino para los agentes de IA | apagar la automatizacion no apaga al operador | el operador enciende el host a mano | 03, caso 05 |
+| Minimo privilegio medido, no disenado | un permiso que no se usa no debe existir | revisarlo cuando cambia el uso | caso 05 |
+| Verificar controles haciendolos fallar | una verificacion puede mentir | scripts de prueba mas largos | caso 06 |
+| Tratar el host de contenedores distinto | un firewall generico rompe la red de contenedores | hardening por rol | 03 |
+| Parcheo automatico solo de seguridad y sin reinicio | seguridad al dia sin cortes sorpresa | los reinicios se acumulan para una ventana | 03 |
+| Alertar solo fallos | un canal ruidoso se ignora | lo sano se mira en el dashboard | 06 |
+| Toda tarea automatica deja una metrica | una tarea que deja de correr es invisible | un exportador mas por tarea | 06 |
+| Backups medidos por su contenido | un archivo reciente no prueba datos nuevos | metricas mas especificas | 05, caso 07 |
+| Pruebas de restauracion sin credenciales | la validacion no se vuelve un secreto a proteger | no prueba un inicio de sesion real | 05 |
+| Remoto de codigo propio | el historial no depende de un servicio externo | hay que respaldarlo y sacarlo de casa | 05 |
+| Borrar solo con cuarentena y copia verificada | un borrado apurado no tiene vuelta | espacio ocupado treinta dias | 04, caso 07 |
+| Archivar en vez de borrar lo que es ultima copia | el historial no se pierde | repositorios inactivos visibles | caso 07 |
+| Dar de baja lo que no se usa | menos superficie y menos mantenimiento | decidirlo con datos de uso | 02 |
+| Probar la migracion en una maquina limpia con las mismas cuentas | los defectos de privilegios solo aparecen asi | una prueba mas larga | caso 07 |
+| Documentacion publica sanitizada | claridad tecnica sin exponer el entorno | menos detalle de implementacion | README |
 
-## Que demuestra
+## Decisiones revertidas
 
-Estas decisiones muestran pensamiento de arquitectura:
+Tambien se documenta lo que se decidio y despues se deshizo:
 
-- definir limites antes de agregar herramientas
-- explicar por que existen los flujos
-- aceptar riesgos residuales explicitamente
-- tratar documentacion como parte de la operacion
-- usar evidencia privada sin publicar datos sensibles
+| Decision original | Por que se revirtio |
+|---|---|
+| Tunel VPN propio con puerto entrante | contradecia el principio de borde cerrado |
+| Canal de chat para alertas | nunca llego a entregar un aviso |
+| Consola dedicada para dashboards | el aviso por mensajeria la volvio innecesaria |
+| Servicios de IA local en el laboratorio | no se usaban; se retiraron con su historial archivado |
+| Un servicio de credenciales autoalojado | no se usaba; su baja esta en curso |
 
 ## Como leerlo
 
-El encuadre mas fuerte es:
-
-> El lab es pequeno, pero esta disenado como plataforma: segmentado, observable, recuperable en diseno y documentado con tradeoffs explicitos.
+> El lab es pequeno, pero esta disenado como plataforma: segmentado, sin
+> exposicion entrante, observable, recuperable con evidencia, y documentado con
+> sus tradeoffs, sus errores y lo que todavia falta.

@@ -1,150 +1,144 @@
 # 04 - Operations Runbook
 
+> State described: September 2026.
+
 ## Purpose
 
-This public runbook summarizes how the homelab is operated without exposing sensitive details. It does not replace the full private documentation. It is the presentable and defensible version.
+Summarize how the homelab is operated without exposing sensitive details. It does
+not replace the internal documentation; it is its presentable version.
 
-## Runbook goals
+## How it is operated in practice
 
-- review general state
-- diagnose incidents without improvising
-- validate basic operational capability
-- reduce dependence on informal memory
-- structure response to failures
-- keep real operations separate from the public version
+The environment is run by one person, so a manual daily review does not scale.
+The model is:
 
-## Diagnostic order
+- **alerts fire only when something failed, was not done or stopped
+  happening.** No confirmations that everything is fine: they teach you to ignore
+  the channel;
+- dashboards are for looking when you want to look, not for finding out about
+  failures;
+- a weekly review covers what no alert measures;
+- every work session starts by reading how the previous one closed and **measures
+  again** what it is about to state: a status written yesterday may already be
+  stale.
+
+## Diagnosis order
 
 ```mermaid
 flowchart LR
-    A[Power / Host] --> B[Basic Network]
+    A[Power / host] --> B[Basic network]
     B --> C[Internal DNS]
-    C --> D[Specific Service]
-    D --> E[Application / Data]
-    E --> F[Backup / Recovery if needed]
+    C --> D[Specific service]
+    D --> E[Application / data]
+    E --> F[Backup / recovery if needed]
 ```
 
-## Daily checklist
+## Weekly review
 
-| Control | Expected result |
+| Check | Expected result |
 |---|---|
-| Hypervisor reachable | operational |
-| Internal DNS resolving | correct |
-| Application platform up | correct |
-| Storage reachable | correct |
-| SIEM / monitoring responding | correct |
-| Latest backup status | validated in private evidence |
-| Offsite copy status | tracked when enabled |
-| Critical alerts | reviewed |
-
-## Weekly checklist
-
-| Control | Expected result |
-|---|---|
-| storage space | sufficient |
-| backup growth | under control |
-| operational cleanup | executed |
-| recent archive | readable |
-| general service state | stable |
-| critical backlog | reviewed |
-| private documentation | evidence updated |
+| storage space | above the threshold that decides whether backup runs |
+| backups and offsite copy | recent content, not just a recent archive |
+| restore tests | recent, successful last run |
+| patches | no accumulated pending reboots |
+| hypervisor machines | all in the expected state after the last reboot |
+| critical pending items | reviewed against the real environment |
 | public documentation | no sensitive data |
 
-## Common operational scenarios
+## Typical operational scenarios
 
 ### 1. A web service does not respond
-
-Validate in this order:
 
 1. name resolution
 2. network reachability
 3. VM or container state
-4. proxy or publication path
-5. service logs
+4. proxy or publication
+5. service logs, **scoped to the last start**
 6. storage or DNS dependency
 
-### 2. Internal DNS failure
+### 2. Internal DNS fails
 
-Validate:
-
-1. DNS service state
+1. service state
 2. listening ports
-3. client DNS configuration
-4. name resolution from a trusted source
+3. client pointing to the right resolver
+4. resolution from a trusted source
 5. impact on dependent services
 
-### 3. Connectivity between zones fails
-
-Validate:
+### 3. Cross-zone connectivity problem
 
 1. zone gateway
 2. forwarding
 3. NAT
 4. allowed cross-zone rules
-5. DNS problem versus transit problem
+5. DNS problem vs. transit problem
 
 ### 4. Storage full or backups failing
 
-Validate:
-
-1. free space
-2. growth by backup domain
-3. staging or old leftovers
+1. free space, **on the host and not only inside the VM**
+2. snapshots retaining old blocks
+3. growth by domain and leftovers
 4. retention policy
-5. integrity of the last known good backup
-6. offsite copy status
+5. integrity of the last good backup
+6. offsite copy state
 
-### 5. Dashboard or monitoring degraded
+### 5. Partial remote access
 
-Validate:
+1. node state on the mesh
+2. advertised **and approved** routes
+3. mesh policy for that source and port
+4. internet exit included in the route list
+5. the local network is not capturing the route by specificity
 
-1. metric source
-2. collector/exporter
-3. scrape or ingestion
-4. dashboard and query
-5. whether the data reflects real operations or missing telemetry
+### 6. Inconsistent dashboard or alert
+
+1. metric source and exporter
+2. scrape or ingestion
+3. dashboard and query
+4. **whether the metric measures the outcome or only that a step ran**
 
 ## Quick decision matrix
 
-| Symptom | First suspicion |
+| Symptom | First suspect |
 |---|---|
-| network access works, name access fails | DNS |
-| several services fail together | hypervisor or network |
-| backup runs but content is inconsistent | pipeline, staging or validation |
-| remote access is partial | advertised routes, mesh policy or NAT |
-| web service fails but VM responds | proxy or application |
-| dashboard is red while service is healthy | metric, exporter or query |
+| works by address, not by name | DNS |
+| several services down at once | hypervisor or network |
+| "recent" backup with old content | an earlier link of the chain |
+| deleting does not free space | a snapshot |
+| partial remote access | advertised routes, mesh policy or local route |
+| an alert that never arrives | the notification path, not the detection |
+| green dashboard, broken service | the metric measures something else |
 
-## Minimum controls by component
+## Changes and deletions
 
-| Component | What to validate |
-|---|---|
-| Hypervisor | VMs, network, storage, transit |
-| Internal DNS | service, resolution, ports |
-| Application platform | containers, proxy, resources |
-| Storage | space, shares, backup directories |
-| SIEM | main services, agents and ingestion |
-| Remote access | node state, **advertised and approved routes**, and actual reachability to the expected destination |
-| Dashboards | real data, freshness and usefulness |
+- every change comes from a commit and a verifiable block; production is not
+  edited by hand
+- every destructive step requires a copy **verified by opening it**
+- **nothing is deleted directly**: it goes to a thirty-day quarantine with a
+  manifest
+- repositories are deleted only if their content is fully contained in another,
+  verified commit by commit; otherwise they are archived
+- roll back when the recent change is clearly the cause and going back costs less
+  than continuing to touch things
 
-## Rollback and recovery
+## Rebuilding the workstation
 
-When to consider rollback:
+The operator's workstation has its own procedure, tested on a clean machine with
+the same two accounts as the real one:
 
-- the recent change is clearly the source of the issue
-- hot-fixing increases risk
-- a trustworthy snapshot or backup exists
-- reverting is safer than continuing to change things
+1. before: encrypted backup, configuration capture and a check that every
+   repository has an up-to-date remote;
+2. after: installation as administrator, restore as an unprivileged user, and
+   task registration as administrator again;
+3. the procedure is written to be followed **without assistance**, including
+   known failures and how to get out of each one.
 
-## Operational lessons incorporated
+Details in [Case 07](case-studies/07-workstation-migration-and-backups-that-lied.md).
 
-- snapshot is not backup
-- generated backup is not trustworthy backup
-- executed schedule is not validation
-- green dashboard is not recoverability
+## Operational lessons built in
+
+- a snapshot does not replace a backup, and it also retains space
+- a generated backup is not a backup with new data
+- a task that ran is not a validated task
+- a configuration read is not an observed behavior
+- an SSH drop does not prove a reboot: confirm it with the boot time
 - if it is not validated, it does not exist
-- diagnostic order matters
-
-## What this runbook demonstrates
-
-The environment was not just installed. It was designed to be operated, observed and recovered with judgment.

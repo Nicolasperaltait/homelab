@@ -1,148 +1,146 @@
 # 05 - Backup and Recovery
 
+> State described: September 2026.
+
 ## Purpose
 
-Describe the public backup and recovery strategy for the homelab.
+Describe the homelab backup and recovery strategy.
 
 ## Principles
 
-- recovery matters more than having a copy
-- snapshots and backups are not the same thing
-- offsite copy without restore capability is not enough
-- periodic validation is part of the design
-- a backup window should answer a clear operational question
-- configuration needed to decrypt or restore is also critical
+- recovering is worth more than having a copy
+- **a backup is measured by the age of its content, not of its archive**
+- a snapshot and a backup are not the same thing
+- an offsite copy without a tested restore is not enough
+- a backup failure has to raise an alert on its own
+- the material needed to decrypt or restore is also critical, and does not live
+  only inside the system it recovers
 
-## Backup model layers
+## Model layers
 
-| Layer | Scope |
+| Layer | What it covers |
 |---|---|
-| Infrastructure | VMs, disks and platform rollback |
-| Application | critical service data |
-| Local storage | operational backup repository |
-| Archive/package | domain-level consolidation |
-| Encrypted offsite | external copy for major-loss scenarios |
-| Evidence | logs, status, alerts and validation |
+| VM image | rollback of whole machines |
+| Data by domain | service configuration and data, packaged and hash-verified |
+| Workstation mirror | continuous sync of the data disk to the NAS |
+| Workstation configuration backup | nightly encrypted archive of the work profile |
+| Code remote | full repository history, at home |
+| Offsite copy | encrypted copy of the critical domains |
+| Restore tests | evidence that recovery is real |
+| Evidence | metrics, events and alerts |
 
 ## Logical flow
 
 ```mermaid
 flowchart LR
-    A[Data source] --> B[Local backup]
-    B --> C[Storage]
-    C --> D[Archive package]
-    D --> E[Encrypted offsite]
-    D --> F[Validation]
-    F --> G[Event / evidence]
+    WS[Workstation] -->|continuous mirror| NAS[NAS]
+    WS -->|nightly encrypted archive| NAS
+    SRV[Services] -->|data by domain| NAS
+    HV[Hypervisor] -->|VM image| IMG[Image storage]
+    NAS --> PKG[Verified packages]
+    PKG --> OFF[Encrypted offsite copy]
+    PKG --> DR[Restore tests]
+    PKG --> MET[Content metrics]
+    DR --> MET
+    MET --> AL[Alert when something falls behind]
 ```
 
-## Operational backup window
+## The chain that broke silently
 
-The public design does not publish real schedules. The operational criteria are:
+In 2026 it turned out that the workstation backup had been frozen for almost four
+months. The chain had five links; it broke at the first one and the other four
+kept running. **The metric measured the age of the compressed archive, not of its
+content**, so it reported a backup a few hours old.
 
-- run critical backups during a low-activity window
-- separate small and heavy backups to improve visibility
-- refresh metrics after the window should be complete
-- answer the question: can I operate today with confidence?
+It was replaced with a simpler scheme, and the principle was written down: the
+metric must measure **what the backup contains**. Details in
+[Case 07](case-studies/07-workstation-migration-and-backups-that-lied.md).
 
-## What should be protected
+## Window and thresholds
 
-- VM state
-- critical service data
-- configuration required for recovery
-- minimum operational continuity
-- ability to return to a known good state
-- evidence that a backup was not only created, but validated
+- backups run in a low-activity window, after patching
+- **if storage lacks the minimum free space, the backup does not run** and the
+  failure is visible; that beats filling the disk in the middle of the night
+- metrics refresh after the window should have finished
+- the question they answer: *can I operate today with confidence?*
+
+## Backing up open files
+
+Part of what is backed up belongs to tools that never close. The criterion, set by
+the machine's owner: **losing a few hours is acceptable; restoring something
+months old while believing it is from yesterday is not.**
+
+- open files are read in shared mode;
+- included databases are checked by extracting them from the backup;
+- an incomplete backup is marked as such and **does not renew the success
+  metric**.
+
+## Offsite copy
+
+- content is encrypted
+- recovery keys live outside the system being recovered
+- destinations, paths and configurations are not published
+- its freshness has its own metric and alert
+
+**2026 lesson:** the offsite copy failed several days in a row without an alert.
+The script ended with an explicit exit code, and the error trap meant to notify
+does not fire in that case. Notification now hooks into process exit, which
+always happens.
+
+## Restore tests
+
+They run on a dedicated machine, separated from production. **Validation stores
+no credentials**: instead of a real login, it validates:
+
+- package integrity (hash), database integrity and expected counts
+- real startup of the service from the backup, in an instance that listens only
+  on the local interface and is never published
+- valid structure of the documentation vault, without opening its content live
+
+Properties:
+
+- restored data is ephemeral, deleted at the end of every run
+- backup access through a restricted channel that only hands out the latest
+  package
+- evidence keeps counts and metadata, never content
+- every run publishes **RTO and RPO** as metrics
+
+Measured results: the small service recovers in **seconds** and the
+documentation domain in **under two minutes**, dominated by package size.
+
+**Honest status:** the tests worked and keep succeeding, but **their periodic run
+was interrupted during the September migration**, and nothing flagged it: no
+alert was watching whether the test stopped running. The cause is still to be
+confirmed, and the missing rule is an alert for a *late restore test*. It was
+found while updating this documentation.
 
 ## Key distinction
 
 | Concept | Correct use |
 |---|---|
-| Snapshot | fast rollback for specific changes |
-| Backup | more portable recovery artifact |
-| Offsite | resilience against local loss |
+| Snapshot | fast rollback before a change; created with a retirement date |
+| Backup | portable recovery |
+| Offsite copy | resilience against local loss |
+| Code remote at home | history and collaboration; **not** an offsite copy |
 | Restore test | evidence that recovery is real |
-| Alert | actionable signal, not a substitute for validation |
-
-## Encrypted offsite copy
-
-The external copy is treated as a resilience control, not just storage.
-
-Public principles:
-
-- offsite content should be encrypted
-- recovery keys/configuration are critical material
-- remote names, real paths and full configs are not published
-- offsite presence is validated, but it does not replace restore testing
-
-## Restore validation (restore tests)
-
-Recovery is no longer an assumption: it is validated automatically and periodically, on a
-dedicated recovery VM (DR role) separated from production.
-
-Security decision: validation does NOT store credentials. Instead of a real login (which
-would require keeping a master password or API key), it validates:
-
-- integrity of the restored data: package checksum, database integrity check and expected
-  record counts
-- a real boot of the critical service from the backup, in an isolated instance (loopback
-  only, never published), which must respond healthy
-- documentation vault: package integrity and structural validity, without opening the
-  live content
-
-Security properties of the process:
-
-- restored data is ephemeral: it lives in memory or a temporary area and is wiped at the
-  end of each run
-- the validation instance is isolated and never exposed to the network
-- backup access is least-privilege: a restricted channel that only delivers the latest
-  package and nothing else
-- evidence records counts and metadata, never sensitive content
-- a failed run leaves an actionable signal (status in metrics), not silence
-
-RTO / RPO: each run measures the recovery time (RTO) and the age of the backup used (RPO),
-and publishes them as metrics. As a reference, the credentials service recovers in seconds
-and the documentation domain in the order of a couple of minutes (dominated by package
-size). RPO is bounded by the daily backup cadence.
-
-Cadence: the critical service is validated more frequently (small package) and the
-documentation domain less frequently (large package), to balance assurance against transfer
-cost. The offsite variant follows the same logic.
+| Alert | actionable signal, not a replacement for validation |
 
 ## Recovery scenarios
 
-### Scenario A - Service failure
-
-- preserve evidence if needed
-- validate network, DNS and storage dependencies
-- restore from domain-level copy if appropriate
-- confirm that the application returns healthy
-
-### Scenario B - VM failure
-
-- evaluate fast rollback
-- restore VM backup where appropriate
-- validate network, boot and reachability
-
-### Scenario C - Partial storage loss
-
-- isolate impact
-- recover from local archive or external copy
-- rebuild the minimum operational flow
-
-### Scenario D - Broad environment loss
-
-- reinstall base platform
-- restore priority components
-- rebuild connectivity and DNS
-- recover critical services by priority
+| Scenario | Path |
+|---|---|
+| Service failure | check DNS, network and storage; restore the domain; confirm health |
+| VM failure | rollback by snapshot or image; validate startup and reachability |
+| Partial storage loss | isolate; recover from local package or external copy |
+| Workstation loss | rebuild procedure tested on a clean machine |
+| Broad loss | base platform, DNS, storage, services by priority |
 
 ## Recovery priority
 
 | Priority | Component |
 |---|---|
-| High | hypervisor, internal DNS, storage, application platform |
-| High | critical service data and configuration |
+| High | hypervisor, internal DNS, storage, mesh gateway, app platform |
+| High | critical service data and configuration, code remote |
 | Medium | observability and dashboards |
 | Variable | auxiliary or lab services |
 
@@ -150,23 +148,11 @@ cost. The offsite variant follows the same logic.
 
 | Risk | State |
 |---|---|
-| formal restore test | implemented (automated per-cycle validation, RTO/RPO measured) |
-| stronger automated validation | strengthened (integrity + real service boot validated per cycle) |
-| physical storage redundancy | evolution pending |
-| SIEM alerting and evidence | maturing |
-| dependency on critical offsite configuration | controlled in private documentation |
-
-## Desired operational indicators
-
-- recent backup visible
-- recent archive readable
-- recent external copy
-- logs without critical error
-- understandable status event
-- periodic restore test documented
+| periodic restore test run | interrupted; resume and alert on lateness |
+| image backup of every VM | partial: some machines only back up data |
+| offsite copy of the code remote | pending, to external media |
+| physical storage redundancy | a support disk failed; replacement postponed |
 
 ## Core idea
 
-This design focuses on the outcome that matters:
-
-> recovery and continuity awareness.
+> recovery awareness, measured by content and proven by restoring.

@@ -1,116 +1,117 @@
-# 02 · Arquitectura y Red
+# 02 - Arquitectura y Red
 
-## Propósito
+> Estado descrito: septiembre de 2026.
 
-Describir la arquitectura del homelab de manera clara, profesional y sanitizada.
+## Proposito
 
-## Principios de diseño
+Describir la arquitectura del homelab de manera clara y sanitizada.
 
-- segmentar por función
+## Principios de diseno
+
+- segmentar por funcion
 - evitar lateralidad innecesaria
-- centralizar la administración
-- no exponer servicios administrativos a Internet
+- centralizar la administracion
+- ningun puerto entrante en el borde
 - priorizar trazabilidad y mantenibilidad
-- crecer por capas, no por improvisación
+- crecer por capas, no por improvisacion, y retirar lo que deja de usarse
 
-## Zonas lógicas
+## Zonas logicas
 
-| Zona | Propósito |
+| Zona | Proposito |
 |---|---|
-| LAN | administración y acceso base |
-| SERVICES | aplicaciones y servicios internos |
-| SECURITY | seguridad, SIEM y telemetría |
-| ~~VPN~~ | ~~acceso remoto seguro~~ — **retirada como zona de red.** Ver el cambio de modelo mas abajo |
-| STORAGE | almacenamiento y backups |
+| Administracion | hipervisor, DNS, NAS, remoto de codigo, puerta de la malla y host de salto |
+| Servicios | contenedores, aplicaciones propias, observabilidad, proxy y la maquina de pruebas de restauracion |
+| Seguridad | SIEM y telemetria |
 
-## Modelo lógico de red
+**La zona de acceso remoto se retiro.** Existia para un tunel punto a punto que
+necesitaba un puerto entrante. El acceso remoto actual no es una zona de red:
+es una capa superpuesta al direccionamiento. Ver [03 - Seguridad y accesos](03-seguridad-y-accesos.md).
+
+## Modelo logico de red
 
 ```mermaid
 flowchart TB
-    LAN[LAN / Administración]
-    SRV[SERVICES / Aplicaciones]
-    SEC[SECURITY / Seguridad]
-    VPN[VPN / Acceso remoto]
-    STO[STORAGE / NAS y backups]
-
-    HV[Hypervisor / Gateway]
-
-    LAN --> HV
+    subgraph ADM[Zona de administracion]
+        HV[Hipervisor / gateway]
+        DNS[DNS interno]
+        NAS[NAS / backup]
+        GW[Puerta de la malla]
+        JMP[Host de salto de agentes]
+        GIT[Remoto de codigo]
+    end
+    subgraph SRV[Zona de servicios]
+        CT[Plataforma de contenedores]
+        DR[Pruebas de restauracion]
+    end
+    subgraph SEC[Zona de seguridad]
+        SIEM[SIEM]
+    end
     HV --> SRV
     HV --> SEC
-    HV --> VPN
-    HV --> STO
+    MALLA[Malla superpuesta] --> GW
 ```
 
-## Razonamiento arquitectónico
+## Razonamiento arquitectonico
 
-Dado que la capa física no está pensada para segmentación avanzada, el aislamiento lógico se implementa en el hypervisor.  
-Eso convierte al host de virtualización en una pieza doblemente crítica:
+La red fisica domestica no esta pensada para segmentacion avanzada, asi que el
+aislamiento se implementa en el hipervisor. Eso lo vuelve doblemente critico:
 
-- plataforma de cómputo
-- punto de tránsito y control entre zonas
+- plataforma de computo
+- punto de transito, NAT y control entre zonas
 
-## Servicios por función
+## Servicios por funcion
 
-| Función | Familia tecnológica (conceptual) | Rol en el diseño |
+| Funcion | Familia tecnologica (conceptual) | Rol en el diseno |
 |---|---|---|
-| Virtualización | hypervisor open-source | host principal y núcleo de tránsito |
-| DNS interno | resolver DNS interno con filtrado | resolución interna y consistencia de acceso |
-| Plataforma de apps | runtime de contenedores sobre VM | ejecución de servicios internos |
-| Proxy | reverse proxy gestionado | publicación controlada de servicios web |
-| SIEM | plataforma SIEM open-source | visibilidad de eventos y seguridad |
-| Monitoreo | TSDB de métricas + capa de dashboards | salud, métricas y dashboards |
-| NAS | solución NAS open-source | almacenamiento y soporte de backup |
-| Acceso remoto | **malla superpuesta con identidad por nodo** | acceso remoto sin exponer puertos |
-
-## Dependencias críticas
-
-```mermaid
-flowchart LR
-    A[Hypervisor] --> B[Servicios internos]
-    A --> C[Storage]
-    A --> D[Zonas segmentadas]
-
-    E[DNS interno] --> B
-    C --> F[Backups]
-    B --> G[Observabilidad]
-    D --> H[Control de acceso]
-```
+| Virtualizacion | hipervisor open-source | host principal y nucleo de transito |
+| DNS interno | resolver con filtrado | resolucion interna, servido por DHCP a toda la red |
+| Plataforma de apps | runtime de contenedores sobre VM | aplicaciones propias y servicios internos |
+| Proxy | proxy inverso gestionado | publicacion interna de servicios web |
+| Remoto de codigo | forja git autoalojada con CI | repositorios propios y pipelines |
+| SIEM | plataforma SIEM open-source | eventos, agentes y evidencia |
+| Monitoreo | TSDB de metricas + capa de dashboards y alertas | salud, frescura y avisos |
+| NAS | solucion NAS open-source | backups, espejo de la estacion y copia fuera del sitio |
+| Recuperacion | VM dedicada en la zona de servicios | restauraciones de prueba efimeras, en una instancia que nunca se publica |
+| Acceso remoto | malla superpuesta con identidad por nodo | acceso sin puertos entrantes |
+| Acceso automatizado | VM de salto | unico camino de los agentes de IA |
 
 ## Dependencias de primer orden
 
 | Componente | Motivo |
 |---|---|
-| Hypervisor | concentra virtualización y tránsito |
-| DNS interno | si falla, muchos servicios “parecen caídos” |
-| Storage | impacta backups, retención y recuperación |
-| Plataforma de apps | concentra servicios publicados y observabilidad |
-| Rutas y NAT | afectan salida, reachability y coherencia del entorno |
+| Hipervisor | concentra virtualizacion, transito y recuperacion |
+| DNS interno | si falla, muchos servicios parecen caidos |
+| Storage | impacta backups, retencion y recuperacion |
+| Plataforma de contenedores | concentra apps, proxy y observabilidad |
+| Puerta de la malla | es el unico acceso desde fuera de casa |
 
-## Publicación de servicios
+## Orden de arranque
 
-Criterio general:
+Las maquinas arrancan por orden de dependencia: primero DNS, despues la puerta
+de la malla y el storage, despues la plataforma de contenedores. Un reinicio real
+del hipervisor mostro que **el arranque escalonado se corto antes de llegar a
+las ultimas dos maquinas**, aunque la configuracion decia que debian arrancar.
+La configuracion leida sola parecia resuelta; el reinicio mostro que no. Queda
+como riesgo abierto hasta confirmar la causa.
+
+## Publicacion de servicios
 
 - acceso administrativo directo y controlado
-- publicación web solo cuando tiene sentido
-- servicios internos preferentemente por FQDN
-- exposición externa evitada salvo diseño explícito
+- servicios internos por nombre, a traves del proxy
+- aplicaciones propias solo alcanzables por tunel, nunca publicadas
+- ninguna exposicion externa
 
 ## Convencion de nombres
 
-Modelo objetivo:
+Nombres internos por rol, dominios separados por zona y alias entendibles para
+los servicios criticos. En el repositorio publico no se publica el naming real.
 
-- nombres internos por rol
-- prefijos o dominios separados por zona
-- alias entendibles para servicios criticos
+## Lectura de la arquitectura
 
-En el repositorio publico no se publica el naming real del entorno.
+Esta arquitectura no compite por complejidad. Compite por claridad:
 
-## Lectura profesional de la arquitectura
-
-Esta arquitectura no compite por complejidad.  
-Compite por claridad:
-
-- cada zona tiene un propósito
-- cada servicio tiene una razón
-- cada dependencia importante está explícita
+- cada zona tiene un proposito
+- cada servicio tiene una razon
+- cada dependencia importante esta explicita
+- lo que dejo de tener razon se retiro: un tunel VPN, una consola NOC, un
+  canal de chat de alertas y varios servicios de IA local

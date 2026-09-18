@@ -1,172 +1,156 @@
 # 05 - Backup y Recuperacion
 
+> Estado descrito: septiembre de 2026.
+
 ## Proposito
 
-Describir la estrategia publica de backup y recuperacion del homelab.
+Describir la estrategia de backup y recuperacion del homelab.
 
 ## Principios
 
 - recuperar vale mas que tener una copia
-- snapshot y backup no son lo mismo
-- offsite sin capacidad real de restore no alcanza
-- la validacion periodica es parte del diseno
-- una ventana de backup debe representar una respuesta operativa clara
-- la configuracion necesaria para descifrar o restaurar tambien es critica
+- **un backup se mide por la edad de su contenido, no por la de su archivo**
+- instantanea y backup no son lo mismo
+- una copia fuera del sitio sin restauracion probada no alcanza
+- una falla de backup tiene que avisar sola
+- el material para descifrar o restaurar tambien es critico, y no vive solo
+  dentro del sistema que recupera
 
-## Capas del modelo de backup
+## Capas del modelo
 
 | Capa | Que cubre |
 |---|---|
-| Infraestructura | VMs, discos y rollback de plataforma |
-| Aplicacion | datos criticos de servicios |
-| Storage local | repositorio operativo de backup |
-| Archivo empaquetado | consolidacion por dominio |
-| Offsite cifrado | copia externa para escenarios de perdida mayor |
-| Evidencia | logs, estado, alertas y validaciones |
+| Imagen de VM | rollback de maquinas completas |
+| Datos por dominio | configuraciones y datos de servicios, empaquetados y verificados por hash |
+| Espejo de la estacion de trabajo | sincronizacion continua del disco de datos hacia el NAS |
+| Respaldo de configuracion de la estacion | archivo cifrado nocturno del perfil de trabajo |
+| Remoto de codigo | historial completo de los repositorios, dentro de casa |
+| Copia fuera del sitio | copia cifrada de los dominios criticos |
+| Pruebas de restauracion | evidencia de que la recuperacion es real |
+| Evidencia | metricas, eventos y alertas |
 
 ## Flujo logico
 
 ```mermaid
 flowchart LR
-    A[Origen de datos] --> B[Backup local]
-    B --> C[Storage]
-    C --> D[Archivo empaquetado]
-    D --> E[Offsite cifrado]
-    D --> F[Validacion]
-    F --> G[Evento / evidencia]
+    WS[Estacion de trabajo] -->|espejo continuo| NAS[NAS]
+    WS -->|archivo cifrado nocturno| NAS
+    SRV[Servicios] -->|datos por dominio| NAS
+    HV[Hipervisor] -->|imagen de VM| IMG[Storage de imagenes]
+    NAS --> PKG[Paquetes verificados]
+    PKG --> OFF[Copia cifrada fuera del sitio]
+    PKG --> DR[Pruebas de restauracion]
+    PKG --> MET[Metricas de contenido]
+    DR --> MET
+    MET --> AL[Alerta si algo se atrasa]
 ```
 
-## Ventana operativa de backups
+## La cadena que se corto sin avisar
 
-El diseno publico no documenta horarios reales. El criterio operativo es:
+En 2026 se descubrio que el respaldo de la estacion de trabajo llevaba casi
+cuatro meses congelado. La cadena tenia cinco eslabones; se corto en el primero
+y los otros cuatro siguieron corriendo. **La metrica media la edad del archivo
+comprimido, no la de su contenido**, asi que informaba un respaldo de pocas horas.
 
-- ejecutar backups criticos en una ventana de baja actividad
-- separar backups pequenos y pesados para mejorar visibilidad
-- refrescar metricas despues de que la ventana deberia haber terminado
-- responder a la pregunta: puedo operar hoy con confianza?
+Se reemplazo por un esquema mas simple, y el principio quedo escrito: la
+metrica tiene que medir **lo que el respaldo contiene**. Detalle en
+[Caso 07](casos-de-estudio/07-migracion-de-workstation-y-respaldos-que-mentian.md).
 
-## Que se busca proteger
+## Ventana y umbrales
 
-- estado de maquinas virtuales
-- datos de servicios criticos
-- configuraciones necesarias para recuperacion
-- continuidad operativa minima
-- capacidad de volver a un punto conocido bueno
-- evidencia de que el backup no solo existio, sino que fue validado
+- los backups corren en una ventana de baja actividad, despues del parcheo
+- **si el storage no tiene el espacio minimo, el backup no corre** y la falla
+  se ve; es preferible a llenar el disco a mitad de la noche
+- las metricas se refrescan despues de que la ventana deberia haber terminado
+- la pregunta que responden: *puedo operar hoy con confianza?*
+
+## Respaldo con archivos abiertos
+
+Parte de lo que se respalda pertenece a herramientas que nunca se cierran. El
+criterio, definido por el dueno del equipo: **perder unas horas es aceptable;
+restaurar algo de hace meses creyendo que es de ayer, no.**
+
+- los archivos abiertos se leen en modo compartido;
+- las bases de datos incluidas se comprueban extrayendolas del respaldo;
+- un respaldo incompleto se marca como tal y **no renueva la metrica de exito**.
+
+## Copia fuera del sitio
+
+- el contenido esta cifrado
+- las claves de recuperacion viven fuera del sistema que se recupera
+- no se publican destinos, rutas ni configuraciones
+- su frescura tiene metrica y alerta propias
+
+**Leccion de 2026:** la copia fuera del sitio fallo varios dias seguidos sin
+alerta. El script terminaba con un codigo de salida explicito, y la trampa de
+errores que debia avisar no se dispara en ese caso. El aviso ahora se engancha a
+la salida del proceso, que ocurre siempre.
+
+## Pruebas de restauracion
+
+Se ejecutan en una maquina dedicada, separada de produccion. **La validacion no
+guarda credenciales**: en vez de un inicio de sesion real se valida:
+
+- integridad del paquete (hash), de la base de datos y conteos esperados
+- arranque real del servicio desde el backup, en una instancia que escucha solo
+  en la interfaz local y nunca se publica
+- estructura valida del vault documental, sin abrir su contenido en vivo
+
+Propiedades:
+
+- datos restaurados efimeros, borrados al terminar cada corrida
+- acceso al backup por un canal restringido que solo entrega el ultimo paquete
+- la evidencia guarda conteos y metadatos, nunca contenido
+- cada corrida publica **RTO y RPO** como metricas
+
+Resultados medidos: el servicio chico se recupera en **segundos** y el dominio
+documental en **menos de dos minutos**, dominado por el tamano del paquete.
+
+**Estado honesto:** las pruebas funcionaron y siguen dando exito, pero **su
+corrida periodica se interrumpio durante la migracion de septiembre**, y nada
+aviso: ninguna alerta miraba si la prueba dejaba de correr. La
+causa esta por confirmar, y la regla que falta es una alerta por *prueba de
+restauracion atrasada*. Se detecto al actualizar esta documentacion.
 
 ## Distincion clave
 
 | Concepto | Uso correcto |
 |---|---|
-| Snapshot | rollback rapido, cambios puntuales |
-| Backup | recuperacion portable y mas robusta |
-| Offsite | resiliencia ante perdida local |
-| Restore test | evidencia de que la recuperacion es real |
-| Alerta | senal accionable, no reemplazo de validacion |
-
-## Offsite cifrado
-
-La copia externa se trata como un control de resiliencia, no como almacenamiento cualquiera.
-
-Principios publicos:
-
-- el contenido offsite debe estar cifrado
-- las claves/configuracion de recuperacion son material critico
-- no se publican nombres de remotos, rutas reales ni configuraciones completas
-- se valida presencia offsite, pero eso no reemplaza restore test
-
-## Validacion de restore (restore tests)
-
-La recuperacion dejo de ser una suposicion: se valida de forma automatica y periodica,
-en una VM dedicada de recuperacion (rol DR) separada de produccion.
-
-Decision de seguridad: la validacion NO almacena credenciales. En vez de un login real
-(que obligaria a guardar una clave maestra o API key), se valida:
-
-- integridad de los datos restaurados: checksum del paquete, verificacion de integridad
-  de la base y conteos esperados
-- arranque real del servicio critico desde el backup, en una instancia aislada (solo
-  loopback, nunca publicada), que debe responder sana
-- vault documental: integridad del paquete y validez de su estructura, sin abrir el
-  contenido en vivo
-
-Propiedades de seguridad del proceso:
-
-- los datos restaurados son efimeros: viven en memoria o area temporal y se borran al
-  terminar cada corrida
-- la instancia de validacion esta aislada y nunca se expone a la red
-- el acceso al backup es de minimo privilegio: un canal restringido que solo entrega el
-  ultimo paquete y nada mas
-- la evidencia guarda conteos y metadatos, nunca contenido sensible
-- una corrida fallida deja una senal accionable (estado en metricas), no silencio
-
-RTO / RPO: cada corrida mide el tiempo de recuperacion (RTO) y la antiguedad del backup
-usado (RPO), y los publica como metricas. Como referencia, el servicio de credenciales se
-recupera en segundos y el dominio documental en el orden de un par de minutos (dominado por
-el tamano del paquete). El RPO queda acotado por la cadencia diaria de backup.
-
-Cadencia: el servicio critico se valida con mayor frecuencia (paquete chico) y el dominio
-documental con menor frecuencia (paquete grande), para equilibrar garantia y costo de
-transferencia. La variante offsite sigue la misma logica.
+| Instantanea | rollback rapido antes de un cambio; se crea con fecha de retiro |
+| Backup | recuperacion portable |
+| Copia fuera del sitio | resiliencia ante perdida local |
+| Remoto de codigo en casa | historial y colaboracion; **no** es una copia fuera del sitio |
+| Prueba de restauracion | evidencia de que la recuperacion es real |
+| Alerta | senal accionable, no reemplazo de la validacion |
 
 ## Escenarios de recuperacion
 
-### Escenario A - Falla de servicio
-
-- preservar evidencia si corresponde
-- validar dependencia de red, DNS y storage
-- recuperar desde copia por dominio si corresponde
-- confirmar que la aplicacion vuelve en estado sano
-
-### Escenario B - Falla de VM
-
-- evaluar rollback rapido
-- restaurar VM desde backup cuando corresponda
-- validar red, arranque y reachability
-
-### Escenario C - Perdida parcial de storage
-
-- aislar impacto
-- recuperar desde archivo local o copia externa
-- reconstruir el flujo operativo minimo
-
-### Escenario D - Perdida amplia del entorno
-
-- reinstalar plataforma base
-- restaurar componentes prioritarios
-- reconstruir conectividad y DNS
-- recuperar servicios criticos segun prioridad
+| Escenario | Camino |
+|---|---|
+| Falla de servicio | validar DNS, red y storage; restaurar el dominio; confirmar salud |
+| Falla de VM | rollback por instantanea o imagen; validar arranque y alcance |
+| Perdida parcial de storage | aislar; recuperar desde paquete local o copia externa |
+| Perdida de la estacion de trabajo | procedimiento de rearmado probado en maquina limpia |
+| Perdida amplia | plataforma base, DNS, storage, servicios por prioridad |
 
 ## Prioridad de recuperacion
 
 | Prioridad | Componente |
 |---|---|
-| Alta | hypervisor, DNS interno, storage, plataforma de apps |
-| Alta | datos y configuracion de servicios criticos |
+| Alta | hipervisor, DNS interno, storage, puerta de la malla, plataforma de apps |
+| Alta | datos y configuracion de servicios criticos, remoto de codigo |
 | Media | observabilidad y dashboards |
 | Variable | servicios auxiliares o de laboratorio |
 
-## Riesgos todavia abiertos
+## Riesgos abiertos
 
 | Riesgo | Estado |
 |---|---|
-| restore test formal | implementado (validacion automatica por ciclo, RTO/RPO medidos) |
-| validacion automatica mas fuerte | reforzada (integridad + arranque real validados por ciclo) |
-| redundancia fisica de storage | pendiente de evolucion |
-| alertas y evidencia SIEM | en maduracion |
-| dependencia de configuracion critica para offsite | controlada en documentacion privada |
-
-## Indicadores operativos deseados
-
-- backup reciente visible
-- archivo reciente legible
-- copia externa reciente
-- logs sin error critico
-- evento de estado entendible
-- restore test periodico documentado
+| corrida periodica de las pruebas de restauracion | interrumpida; reanudar y alertar por atraso |
+| respaldo de imagen de todas las VMs | parcial: algunas maquinas solo respaldan datos |
+| copia fuera de casa del remoto de codigo | pendiente, a medio externo |
+| redundancia fisica de storage | un disco de soporte fallo; reemplazo postergado |
 
 ## Idea central
 
-Este diseno se enfoca en el resultado que importa:
-
-> conciencia de recuperacion y continuidad.
+> conciencia de recuperacion, medida por contenido y probada restaurando.

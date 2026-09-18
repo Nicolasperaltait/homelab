@@ -12,42 +12,37 @@
 
 ## What this documents
 
-This is not a tool list. It documents how a small infrastructure environment is reasoned, operated and explained without exposing sensitive implementation details:
+This is not a tool list. It documents how a small infrastructure environment, run by one person, is reasoned, operated and explained without exposing sensitive implementation details:
 
-- designed a segmented internal platform with explicit trust boundaries
-- defined security boundaries and a controlled access model
-- built repeatable operations and recovery practices
-- separated private operational evidence from public documentation
-- documented architectural decisions, tradeoffs, residual risks and roadmap
-- translated real operational lessons into sanitized case studies
+- a segmented platform on a single hypervisor, with explicit trust boundaries
+- remote access through an overlay mesh with **no inbound ports** at the edge
+- AI agents working through a single jump host with a manual switch and scoped privileged reading
+- automatic, observed patching, and alerts that fire **only on failures**
+- backups measured by the age of their **content**, an encrypted offsite copy and restore tests with measured RTO
+- a self-hosted code remote with continuous integration
+- architectural decisions, reverted decisions, residual risks and a roadmap
+- real operational lessons, including our own mistakes, turned into sanitized case studies
 
-The real environment is documented privately. This repository publishes the architecture reasoning, operational model and security posture at a sanitized level.
+The real environment is documented privately. This repository publishes the architecture reasoning, operational model and security posture at a sanitized level. **State described: September 2026.**
 
 ---
 
 ## Architecture story
 
-The project is built around a small but realistic infrastructure model:
-
-- a hypervisor as the compute, transit and control-plane anchor
-- internal DNS as a critical dependency for service access
-- separated service, security, storage and remote-access concerns
-- observability designed to answer operational questions
-- SIEM treated as evidence and security visibility, not just another dashboard
-- backup strategy focused on recoverability rather than archive count
-
 ```mermaid
 flowchart LR
-    OP[Operator] --> MGMT[Management Access]
-    MGMT --> HV[Hypervisor / Control Plane]
-    HV --> APP[Services Zone]
-    HV --> SEC[Security Zone]
-    HV --> VPN[Remote Access Zone]
-    HV --> STO[Storage / Backup Zone]
+    OP[Operator] --> MGMT[Management zone]
+    REM[Operator away] -->|overlay mesh, no inbound ports| MGMT
+    AI[AI agents] -->|single jump host| MGMT
+    MGMT --> HV[Hypervisor / control plane]
+    HV --> APP[Services zone]
+    HV --> SEC[Security zone]
+    HV --> STO[Storage / backup]
 
-    APP --> MON[Operational Dashboards]
-    SEC --> SIEM[Security Monitoring]
-    STO --> DR[Backup / Recovery Practice]
+    APP --> MON[Metrics, dashboards, failure alerts]
+    SEC --> SIEM[Security evidence]
+    STO --> OFF[Encrypted offsite copy]
+    STO --> DR[Restore tests]
 ```
 
 ---
@@ -119,5 +114,5 @@ homelab/
         ├── 05-backup-y-recuperacion.md
         ├── 06-observabilidad-y-roadmap.md
         ├── 07-decisiones-arquitectonicas.md
-        └── casos-de-estudio/
+        └── casos-de-estudio/  # 01-07
 ```

@@ -1,163 +1,117 @@
-# 02 — Architecture and Network
+# 02 - Architecture and Network
 
-## Architecture goals
+> State described: September 2026.
 
-The architecture is designed around five priorities:
+## Purpose
 
-1. security
-2. simplicity
-3. observability
-4. service isolation
-5. maintainable growth
+Describe the homelab architecture in a clear, sanitized way.
 
----
+## Design principles
 
-## High-level topology
+- segment by function
+- avoid unnecessary lateral movement
+- centralize administration
+- no inbound port at the edge
+- prioritize traceability and maintainability
+- grow in layers, not by improvisation, and retire what stops being used
 
-```mermaid
-flowchart LR
-    U[Operations Workstation] --> D[Internal DNS]
-    U --> H[Hypervisor / Gateway]
-    U --> N[Storage Service]
+## Logical zones
 
-    H --> A[Applications Zone]
-    H --> S[Security Zone]
-    H --> V[VPN Zone]
-
-    A --> RP[Reverse Proxy]
-    A --> AP[App Platform]
-    A --> MO[Monitoring Stack]
-
-    S --> SIEM[Security Monitoring]
-    V --> WG[Remote Access Service]
-    N --> BK[Backup Repository]
-```
-
----
-
-## Sanitized zone model
-
-| Zone | Public description | Purpose |
-|---|---|---|
-| Management / LAN | management zone | local admin access, DNS, NAS, hypervisor management |
-| Applications | application zone | internal applications and reverse proxy |
-| Security | security zone | SIEM and security telemetry |
-| ~~VPN~~ | ~~remote access zone~~ | **retired as a network zone.** See the model change in doc 03 |
-
----
-
-## Logical service map
-
-| Service role | Technology family (conceptual) | Zone | Purpose |
-|---|---|---|---|
-| Hypervisor | open-source hypervisor | Management | compute, gateway, segmentation control |
-| Internal DNS | internal DNS resolver with filtering | Management | name resolution and DNS filtering |
-| Storage / NAS | open-source NAS solution | Management | backup target and shared storage |
-| App platform | container runtime on a Linux VM | Applications | self-hosted services |
-| Reverse proxy | managed reverse proxy | Applications | controlled internal publication |
-| Security monitoring | open-source SIEM platform | Security | event collection and visibility |
-| Metrics and dashboards | metrics TSDB + dashboard layer | Applications | observability |
-| Remote access | **overlay mesh with per-node identity** | Overlay | remote access without exposing inbound ports |
-
----
-
-## Dependency model
-
-```mermaid
-flowchart TD
-    P[Hypervisor] --> APPS[Applications Zone]
-    P --> SEC[Security Zone]
-    P --> VPN[VPN Zone]
-
-    DNS[Internal DNS] --> APPS
-    DNS --> SEC
-    DNS --> VPN
-
-    APPS --> PROXY[Reverse Proxy]
-    APPS --> MON[Monitoring Stack]
-
-    SEC --> WZ[Security Monitoring]
-
-    NAS[Storage / Backup Target] --> BKP[Backup Archives]
-    APPS --> NAS
-```
-
----
-
-## Connectivity philosophy
-
-The environment does **not** assume free east-west traffic.  
-Instead, the intended model is:
-
-- allow the admin workstation to reach all required systems
-- restrict lateral traffic unless justified
-- document legitimate cross-zone flows
-- prefer internal name resolution over ad-hoc access patterns
-- avoid direct Internet exposure of admin interfaces
-
----
-
-## Example legitimate cross-zone flows
-
-| Source zone | Destination zone | Why it exists |
-|---|---|---|
-| Management | All zones | administration and validation |
-| Applications | Security | service publication or telemetry workflows |
-| Applications | Management / Storage | backup or file workflow integration |
-| Remote access mesh | Management and selected services, **per advertised route** | secure remote administrative access with no inbound ports |
-
----
-
-## Why the hypervisor matters so much
-
-The virtualization host is not just “where VMs run.”
-
-It is also:
-
-- the segmentation anchor
-- the gateway between internal zones
-- a critical dependency for routing/NAT behavior
-- a major recovery pivot
-
-That makes it one of the most operationally sensitive parts of the environment.
-
----
-
-## Why this architecture is still intentionally small
-
-This is not a complexity contest.
-
-The environment is intentionally limited so that each layer remains:
-
-- understandable
-- testable
-- supportable by one operator
-- explainable in public documentation
-
----
-
-## Architectural strengths
-
-- clean role separation
-- low ambiguity in service purpose
-- strong fit for public technical explanation
-- practical rather than decorative complexity
-- room to grow without redesigning from scratch
-
----
-
-## Architectural risks still tracked
-
-| Risk | Why it matters |
+| Zone | Purpose |
 |---|---|
-| DNS remains critical | many failures look like “service outage” when they are resolution problems |
-| Hypervisor is a control-plane dependency | segmentation and VM availability depend on it |
-| Restore confidence must be proven | backup presence is not the same as recovery readiness |
-| Remote access design is constrained by upstream networking | VPN design quality depends on the external connectivity model |
+| Management | hypervisor, DNS, NAS, code remote, mesh gateway and jump host |
+| Services | containers, in-house applications, observability, proxy and the restore test machine |
+| Security | SIEM and telemetry |
 
----
+**The remote access zone was retired.** It existed for a point-to-point tunnel
+that required an inbound port. Current remote access is not a network zone: it
+is a layer on top of the addressing. See [03 - Security and access](03-security-and-access.md).
 
-## Summary
+## Logical network model
 
-The architecture is strong because it is **coherent**.  
-Every major service exists for a reason, belongs to a role, and supports a visible operational outcome.
+```mermaid
+flowchart TB
+    subgraph ADM[Management zone]
+        HV[Hypervisor / gateway]
+        DNS[Internal DNS]
+        NAS[NAS / backup]
+        GW[Mesh gateway]
+        JMP[Agent jump host]
+        GIT[Code remote]
+    end
+    subgraph SRV[Services zone]
+        CT[Container platform]
+        DR[Restore tests]
+    end
+    subgraph SEC[Security zone]
+        SIEM[SIEM]
+    end
+    HV --> SRV
+    HV --> SEC
+    MESH[Overlay mesh] --> GW
+```
+
+## Architectural reasoning
+
+The home physical network is not designed for advanced segmentation, so
+isolation is implemented on the hypervisor. That makes it doubly critical:
+
+- compute platform
+- transit, NAT and control point between zones
+
+## Services by function
+
+| Function | Technology family (conceptual) | Role in the design |
+|---|---|---|
+| Virtualization | open-source hypervisor | main host and transit core |
+| Internal DNS | filtering resolver | internal resolution, served by DHCP to the whole network |
+| App platform | container runtime on a VM | in-house applications and internal services |
+| Proxy | managed reverse proxy | internal publication of web services |
+| Code remote | self-hosted git forge with CI | own repositories and pipelines |
+| SIEM | open-source SIEM platform | events, agents and evidence |
+| Monitoring | metrics TSDB + dashboard and alerting layer | health, freshness and notifications |
+| NAS | open-source NAS solution | backups, workstation mirror and offsite copy |
+| Recovery | dedicated VM in the services zone | ephemeral test restores, in an instance that is never published |
+| Remote access | overlay mesh with per-node identity | access with no inbound ports |
+| Automated access | jump VM | single path for AI agents |
+
+## First-order dependencies
+
+| Component | Reason |
+|---|---|
+| Hypervisor | concentrates virtualization, transit and recovery |
+| Internal DNS | if it fails, many services look down |
+| Storage | affects backups, retention and recovery |
+| Container platform | concentrates apps, proxy and observability |
+| Mesh gateway | it is the only access from outside home |
+
+## Boot order
+
+Machines start in dependency order: DNS first, then the mesh gateway and
+storage, then the container platform. A real hypervisor reboot showed that **the
+staged startup stopped before reaching the last two machines**, even though the
+configuration said they should start. Read on its own, the configuration looked
+solved; the reboot showed it was not. It remains an open risk until the cause is
+confirmed.
+
+## Service publication
+
+- direct, controlled administrative access
+- internal services by name, through the proxy
+- in-house applications reachable only by tunnel, never published
+- no external exposure
+
+## Naming convention
+
+Internal names by role, domains separated by zone and understandable aliases for
+critical services. The real naming is not published in this repository.
+
+## Reading the architecture
+
+This architecture does not compete on complexity. It competes on clarity:
+
+- every zone has a purpose
+- every service has a reason
+- every important dependency is explicit
+- what stopped having a reason was retired: a VPN tunnel, a NOC console, a chat
+  alert channel and several local AI services

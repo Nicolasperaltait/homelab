@@ -1,134 +1,147 @@
 # 06 - Observability and Roadmap
 
+> State described: September 2026.
+
 ## Purpose
 
-Explain how the environment is observed and where it is evolving.
+Explain how the environment is observed, how it alerts and where it is heading.
 
 ## Conceptual separation
 
-This homelab separates three layers that are often mixed together:
-
 | Layer | Purpose |
 |---|---|
-| Infrastructure observability | health, resources, availability, performance |
-| Security visibility | events, agents, telemetry, investigation |
-| Operational evidence | proof that backups, alerts and controls worked |
+| Infrastructure observability | health, resources, availability |
+| Security visibility | events, agents, telemetry |
+| Operational evidence | proof that backups, patches and controls worked |
+| Alerts | notice of what failed, was not done or stopped happening |
 
 ## Logical stack
 
 ```mermaid
 flowchart LR
-    A[Hosts and services] --> B[Metrics]
-    A --> C[Events]
-    B --> D[Dashboards]
-    C --> E[SIEM]
-    D --> F[Operational visibility]
-    E --> G[Security visibility]
-    C --> H[Operational evidence]
+    A[Hosts and services] --> B[Exporters]
+    T[Automated tasks] -->|last-run metric| B
+    B --> C[Metrics TSDB]
+    C --> D[Dashboards]
+    C --> R[Alert rules]
+    R --> M[Messaging channel]
+    A --> E[SIEM agents]
+    E --> S[SIEM]
+    S -->|indicators| C
 ```
 
-## What observability should answer
+## What is measured
 
-- what is down
-- what is degraded
-- what changed
-- which service is consuming more resources
-- which critical dependency stopped responding
-- which incident requires immediate attention
-- which backup or offsite copy failed or missed its window
+- host and service availability, through network, HTTP and DNS probes
+- hypervisor and container resources
+- freshness and result of every backup domain and of the offsite copy
+- age of the workstation nightly backup
+- restore tests: result, RTO and RPO
+- pending patches, pending reboots and last patching run
+- container updates, failed and rolled back
+- remote access mesh state and its audit
+- SIEM indicators: active agents and high-severity alerts
+- whether the agents' jump host is on
 
-## Real value
+**Rule:** every automated task leaves a metric with the time of its last
+successful run. Without that metric, a task that stops running is invisible.
 
-Observability is not here to decorate dashboards. It is here to improve operations and speed up diagnosis.
+## Alerts
 
-## Operational dashboards
+Alerts go from the dashboard layer to a messaging channel. There are only three
+valid forms:
 
-Dashboards are designed to answer concrete questions:
+| Form | Example |
+|---|---|
+| Something failed | an exporter down, a probe that does not answer |
+| Something was not done | late backup, unapplied patches, pending reboot |
+| Something stopped happening | the mesh audit went silent, an indicator not updated |
 
-- general environment health
-- availability of core services
-- backup and offsite state
-- storage pressure
-- signals relevant for a NOC-style or operations view
+**Forbidden in the channel:** confirmations, daily summaries, "backup completed".
+They teach you to ignore the phone. *Resolved* notices are kept because they close
+a notice that was already sent.
 
-Public rule:
+Rules have no conditional routing: no alert is lost for not matching a filter.
 
-- do not publish real dashboard JSON when it contains paths, hosts or sensitive queries
-- document purpose and design criteria
-- keep private before/after JSON backups for real dashboard changes
+**History:** the first alert channel was a chat that never delivered anything;
+for months **no alert reached anywhere**, while the rules kept evaluating. It was
+replaced with a messaging channel with native integration. The lesson: an alert
+without a verified destination is not an alert.
+
+## Dashboards
+
+They are designed to answer concrete questions: overall health, backup and
+offsite state, storage pressure, patches and remote access.
+
+- the real dashboard JSON is not published
+- each dashboard's goal is documented
+- changes are backed up before and after
+
+The console dedicated to showing dashboards on a screen was retired: messaging
+alerts made it unnecessary.
 
 ## SIEM as evidence
 
-The SIEM is used as a security and operational evidence layer. Public use examples:
+- backup failures are raised to high-severity events
+- disconnected agents are detected
+- tactical alerting is separated from historical evidence
 
-- raise backup failures as high-severity alerts
-- detect disconnected agents
-- retain relevant events for technical audit
-- separate tactical alerting from historical evidence
-
-The public version does not include real rules, IDs, paths, JSON events or agent names.
+The public version includes no rules, identifiers or events.
 
 ## Current state
 
-### Solved
+### Working
 
-- baseline metrics
-- infrastructure dashboards
-- initial security visibility
-- distinction between monitoring and security
-- backup window validated with automated evidence (consecutive cycles confirmed, event and checksum emitted per run)
-- automated restore tests as recovery evidence: integrity plus real service boot validated per cycle, RTO/RPO measured, without storing credentials
-- SIEM active agent inventory completed; agents for decommissioned hosts removed from the manager
-- NOC display node operational: internal DNS resolving, kiosk towards operational dashboard validated
-- public documentation of the approach
-- separation between private and public documentation
+- metrics from every infrastructure host and availability probes
+- failure alerts to the messaging channel
+- content metrics for backups and the offsite copy
+- patching and container update metrics
+- mesh audit with a silence alert
+- SIEM indicators integrated into monitoring
 
 ### Maturing
 
-- actionable alerts by channel (critical notifications; integration pending)
-- more executive dashboards
-- finer storage and network monitoring
-- better integration of critical events
+- alert for a **late** restore test, not only a failed one
+- SIEM noise: the vast majority of its alerts are low severity
+- ingestion of system auditing into the SIEM
+- more readable dashboards for a quick review
 
 ## Prioritized roadmap
 
 ```mermaid
 flowchart TD
-    A[Real restore test] --> B[Operational alerts]
-    B --> C[SIEM as evidence]
-    C --> D[DNS redundancy]
-    D --> E[More robust remote access]
-    E --> F[Role-aware hardening v2]
-    F --> G[Better storage resilience]
+    A[Resume and watch restore tests] --> B[Image backup of every VM]
+    B --> C[External copy of the code remote]
+    C --> D[Complete per-host filtering]
+    D --> E[Authentication in the in-house apps]
+    E --> F[Second DNS resolver]
+    F --> G[Replace the support disk]
 ```
 
 ## Ordered backlog
 
-| Priority | Item | Why it matters |
+| Priority | Item | Reason |
 |---|---|---|
-| High | operational alerts | reduces time to react |
-| High | SIEM evidence for backups | proves failures and status with traceability |
-| High | DNS redundancy | reduces a central dependency risk |
-| High | remote access refinement | addresses connectivity limitations |
-| Medium | role-aware hardening v2 | matures controls without breaking operations |
-| Medium | storage improvements | resilience and capacity |
-| Medium | more executive dashboards | faster operational reading |
+| High | Restore tests with a lateness alert | today they can stop running silently |
+| High | Reliable startup of every VM | a real reboot left two machines off |
+| High | Image backup for every VM | some only back up data |
+| High | External copy of the code remote | a remote at home is not an offsite copy |
+| Medium | Complete per-host filtering | close the measured gap |
+| Medium | Authentication in the in-house apps | do not rely only on the tunnel |
+| Medium | Second DNS resolver | single point of failure |
+| Medium | Reduce SIEM noise | useful signal over volume |
+| Low | Replace the support disk | postponed for budget |
 
-## Correct roadmap reading
+## Reading the roadmap
 
-The next step is not adding more things. It is closing what already matters:
-
-- recover
-- alert
-- evidence
-- tolerate failures better
-- operate with more confidence
+The next step is not adding tools. It is closing what matters better: recover,
+alert, evidence and withstand failures.
 
 ## Conclusion
 
-Observability and roadmap maturity are shown by making clear:
+Observability shows maturity when it makes clear:
 
 - what already works
 - what is still fragile
-- what is prioritized
-- why
+- what is prioritized and why
+- and that everything that stops running **says so on its own**

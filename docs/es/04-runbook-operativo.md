@@ -1,17 +1,24 @@
 # 04 - Runbook Operativo
 
+> Estado descrito: septiembre de 2026.
+
 ## Proposito
 
-Este runbook publico resume como se opera el homelab sin exponer detalles sensibles. No reemplaza la documentacion interna completa; funciona como version presentable y defendible.
+Resumir como se opera el homelab sin exponer detalles sensibles. No reemplaza la
+documentacion interna; es su version presentable.
 
-## Objetivos del runbook
+## Como se opera en la practica
 
-- revisar el estado general
-- diagnosticar incidentes sin improvisar
-- validar capacidad operativa basica
-- reducir dependencia de memoria informal
-- ordenar la respuesta ante fallos
-- mantener separada la operacion real de la version publica
+El entorno lo opera una sola persona, asi que la revision diaria manual no escala.
+El modelo es:
+
+- **las alertas avisan solo cuando algo fallo, no se hizo o dejo de pasar.**
+  Nada de confirmaciones de que todo esta bien: ensenan a ignorar el canal;
+- los dashboards se miran cuando uno quiere mirar, no para enterarse de fallos;
+- una revision semanal cubre lo que ninguna alerta mide;
+- cada sesion de trabajo arranca leyendo el estado de cierre de la anterior y
+  **vuelve a medir** lo que va a afirmar: un estado escrito ayer ya puede estar
+  vencido.
 
 ## Orden de diagnostico
 
@@ -24,127 +31,111 @@ flowchart LR
     E --> F[Backup / recuperacion si aplica]
 ```
 
-## Checklist diario
+## Revision semanal
 
 | Control | Resultado esperado |
 |---|---|
-| Hypervisor accesible | operativo |
-| DNS interno resolviendo | correcto |
-| Plataforma de apps arriba | correcta |
-| Storage accesible | correcto |
-| SIEM / monitoreo respondiendo | correcto |
-| Estado del ultimo backup | validado en evidencia privada |
-| Estado de copia offsite | monitoreado cuando esta habilitada |
-| Alertas criticas | revisadas |
-
-## Checklist semanal
-
-| Control | Resultado esperado |
-|---|---|
-| espacio en storage | suficiente |
-| crecimiento de backups | bajo control |
-| limpieza operativa | ejecutada |
-| archivo reciente legible | valido |
-| estado general de servicios | estable |
-| revision de pendientes criticos | actualizada |
-| documentacion privada | evidencia actualizada |
+| espacio en storage | por encima del umbral que decide si el backup corre |
+| backups y copia fuera del sitio | contenido reciente, no solo archivo reciente |
+| pruebas de restauracion | ultima corrida reciente y exitosa |
+| parches | sin reinicios pendientes acumulados |
+| maquinas del hipervisor | todas en el estado esperado despues del ultimo reinicio |
+| pendientes criticos | revisados contra el entorno real |
 | documentacion publica | sin datos sensibles |
 
 ## Escenarios operativos tipicos
 
 ### 1. No responde un servicio web
 
-Validar en este orden:
-
 1. resolucion de nombre
-2. reachability por red
-3. estado de la VM o contenedor
+2. alcance por red
+3. estado de la VM o del contenedor
 4. proxy o publicacion
-5. logs del servicio
+5. logs del servicio, **acotados al ultimo arranque**
 6. dependencia de storage o DNS
 
 ### 2. Falla DNS interno
 
-Validar:
-
-1. estado del servicio DNS
+1. estado del servicio
 2. puertos de escucha
-3. cliente apuntando al DNS correcto
-4. resolucion por nombre desde un origen confiable
+3. cliente apuntando al resolver correcto
+4. resolucion desde un origen confiable
 5. impacto sobre servicios dependientes
 
-### 3. Problema de salida o conectividad entre zonas
-
-Validar:
+### 3. Problema de conectividad entre zonas
 
 1. gateway de la zona
-2. forwarding
+2. reenvio
 3. NAT
 4. reglas permitidas entre zonas
-5. diferencia entre problema DNS y problema de transito
+5. diferencia entre problema de DNS y problema de transito
 
 ### 4. Storage lleno o backups fallando
 
-Validar:
-
-1. espacio libre
-2. crecimiento por dominio
-3. staging o residuos viejos
+1. espacio libre, **en el anfitrion y no solo dentro de la VM**
+2. instantaneas que retienen bloques viejos
+3. crecimiento por dominio y residuos
 4. politica de retencion
 5. integridad del ultimo backup bueno
-6. estado de copia offsite
+6. estado de la copia fuera del sitio
 
-### 5. Dashboard o monitoreo degradado
+### 5. Acceso remoto parcial
 
-Validar:
+1. estado del nodo en la malla
+2. rutas anunciadas **y aprobadas**
+3. politica de la malla para ese origen y puerto
+4. salida a internet incluida en la lista de rutas
+5. que la red local no este capturando la ruta por especificidad
 
-1. fuente de metricas
-2. collector/exporter
-3. scrape o ingesta
-4. dashboard y query
-5. si el dato representa operacion real o solo ausencia de metrica
+### 6. Dashboard o alerta inconsistente
+
+1. fuente de metricas y exportador
+2. scrape o ingesta
+3. dashboard y query
+4. **si la metrica mide el resultado o solo que un paso corrio**
 
 ## Matriz rapida de decision
 
 | Sintoma | Primera sospecha |
 |---|---|
-| por red funciona, por nombre no | DNS |
-| varios servicios caidos a la vez | hypervisor o red |
-| backup corre pero contenido inconsistente | pipeline, staging o validacion |
-| acceso remoto parcial | rutas anunciadas, politica de la malla o NAT |
-| servicio web no abre pero VM responde | proxy o aplicacion |
-| dashboard en rojo con servicio sano | metrica, exporter o query |
+| por direccion funciona, por nombre no | DNS |
+| varios servicios caidos a la vez | hipervisor o red |
+| backup "reciente" con contenido viejo | un eslabon anterior de la cadena |
+| borrar no libera espacio | una instantanea |
+| acceso remoto parcial | rutas anunciadas, politica de la malla o ruta local |
+| alerta que nunca llega | la ruta de aviso, no la deteccion |
+| dashboard verde con servicio roto | la metrica mide otra cosa |
 
-## Controles minimos por componente
+## Cambios y borrados
 
-| Componente | Que validar |
-|---|---|
-| Hypervisor | VMs arriba, red, storage, transito |
-| DNS interno | servicio, resolucion, puertos |
-| Plataforma de apps | contenedores, proxy, recursos |
-| Storage | espacio, shares, directorios de backup |
-| SIEM | servicios principales, agentes e ingesta |
-| Acceso remoto | estado del nodo, **rutas anunciadas y aprobadas**, y alcance real al destino esperado |
-| Dashboards | datos reales, frescura y utilidad |
+- todo cambio sale de un commit y de un bloque verificable; produccion no se
+  edita a mano
+- todo paso destructivo necesita una copia **verificada abriendola**
+- **nada se borra directo**: va a una cuarentena de treinta dias con manifiesto
+- los repositorios se borran solo si su contenido esta integro en otro,
+  verificado commit a commit; si no, se archivan
+- rollback cuando el cambio reciente es claramente el origen y volver cuesta
+  menos que seguir tocando
 
-## Rollback y recuperacion
+## Rearmar la estacion de trabajo
 
-Cuando considerar rollback:
+La estacion de trabajo del operador tiene su propio procedimiento, probado en
+una maquina limpia con las mismas dos cuentas que el equipo real:
 
-- el cambio reciente es claramente el origen del problema
-- reparar en caliente aumenta riesgo
-- existe snapshot o backup reciente confiable
-- el costo de volver atras es menor que seguir tocando
+1. antes: respaldo cifrado, captura de configuracion y verificacion de que todo
+   repositorio tiene remoto al dia;
+2. despues: instalacion como administrador, restauracion como usuario sin
+   privilegios, y registro de tareas otra vez como administrador;
+3. el procedimiento esta escrito para seguirse **sin asistencia**, incluidas las
+   fallas conocidas y como salir de cada una.
+
+Detalle en [Caso 07](casos-de-estudio/07-migracion-de-workstation-y-respaldos-que-mentian.md).
 
 ## Lecciones operativas incorporadas
 
-- snapshot no reemplaza backup
-- backup generado no equivale a backup confiable
-- cron ejecutado no equivale a validacion
-- dashboard verde no equivale a recuperabilidad
+- una instantanea no reemplaza un backup, y ademas retiene espacio
+- un backup generado no equivale a un backup con datos nuevos
+- una tarea ejecutada no equivale a una tarea validada
+- una configuracion leida no equivale a un comportamiento observado
+- una caida de SSH no prueba un reinicio: se confirma con el tiempo de arranque
 - si no esta validado, no existe
-- el orden de diagnostico importa
-
-## Que demuestra este runbook
-
-Este documento muestra que el entorno no fue solo instalado. Fue pensado para ser operado, observado y recuperado con criterio.
