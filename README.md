@@ -114,5 +114,5 @@ homelab/
         ├── 05-backup-y-recuperacion.md
         ├── 06-observabilidad-y-roadmap.md
         ├── 07-decisiones-arquitectonicas.md
-        └── casos-de-estudio/  # 01-07
+        └── casos-de-estudio/  # 01-08
 ```

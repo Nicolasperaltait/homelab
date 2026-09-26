@@ -15,3 +15,4 @@ They intentionally omit real IPs, hostnames, paths, logs, commands and sensitive
 | [05 - AI agent access under least privilege](05-ai-agent-access-under-least-privilege.md) | a single path with a physical off switch, scoped privileged reading, and permissions sized from measured use |
 | [06 - When a control does not measure what it claims to](06-when-a-control-does-not-measure-what-it-claims.md) | seven verifications that lied, the shared pattern, and the practice of checking what must fail |
 | [07 - Workstation migration and backups that lied](07-workstation-migration-and-backups-that-lied.md) | metrics that measured the wrong step, a phased migration with quarantine, and a clean-machine test with two accounts |
+| [08 - Tidying up a NAS nobody used](08-tidying-up-a-nas-nobody-used.md) | least-privilege identities, persisting in the configuration that rules, testing from where the user tests, and making room before inviting use |
