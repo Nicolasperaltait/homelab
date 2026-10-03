@@ -1,5 +1,11 @@
 # Homelab Prod
 
+<!-- MEMORY-UNIFICATION:portable:start -->
+## Local continuity
+
+The optional private local memory package contains context, decisions and offline continuity. It travels with a local checkout and is excluded from public history. It is independent of a central hub; reconnecting requires explicit reconciliation.
+<!-- MEMORY-UNIFICATION:portable:end -->
+
 ![Public Docs](https://img.shields.io/badge/Public%20Docs-Yes-0A66C2?style=for-the-badge)
 ![Sanitized](https://img.shields.io/badge/Sanitized-Yes-2E8B57?style=for-the-badge)
 ![Bilingual](https://img.shields.io/badge/Bilingual-ES%20%7C%20EN-6A5ACD?style=for-the-badge)
