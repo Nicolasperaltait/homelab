@@ -2,15 +2,15 @@
 
 > Infraestructura productiva de una sola persona: chica en escala, completa en piezas, encendida 24/7.
 
-![Proxmox VE](https://img.shields.io/badge/Proxmox_VE-tipo_1-E57000?style=for-the-badge&logo=proxmox&logoColor=white)
-![Wazuh](https://img.shields.io/badge/Wazuh-SIEM-005571?style=for-the-badge)
-![Prometheus](https://img.shields.io/badge/Prometheus-metricas-E6522C?style=for-the-badge&logo=prometheus&logoColor=white)
-![Grafana](https://img.shields.io/badge/Grafana-dashboards-F46800?style=for-the-badge&logo=grafana&logoColor=white)
-![Tailscale](https://img.shields.io/badge/Tailscale-sin_puertos_abiertos-242424?style=for-the-badge&logo=tailscale&logoColor=white)
-![Pi-hole](https://img.shields.io/badge/Pi--hole-DNS-96060C?style=for-the-badge&logo=pihole&logoColor=white)
-![OpenMediaVault](https://img.shields.io/badge/OpenMediaVault-NAS-5DACDF?style=for-the-badge)
-![Docker](https://img.shields.io/badge/Docker-apps-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Forgejo](https://img.shields.io/badge/Forgejo-git_privado_+_CI-FB923C?style=for-the-badge&logo=forgejo&logoColor=white)
+<p align="center">
+  <img src="https://img.shields.io/badge/Proxmox_VE-1F2937?style=for-the-badge&logo=proxmox&logoColor=white" alt="Proxmox VE" />
+  <img src="https://img.shields.io/badge/Wazuh_SIEM-B91C1C?style=for-the-badge&logo=wazuh&logoColor=white" alt="Wazuh SIEM" />
+  <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white" alt="Grafana" />
+  <img src="https://img.shields.io/badge/Tailscale-242424?style=for-the-badge&logo=tailscale&logoColor=white" alt="Tailscale" />
+  <img src="https://img.shields.io/badge/Pi--hole-111827?style=for-the-badge&logo=pihole&logoColor=white" alt="Pi-hole" />
+  <img src="https://img.shields.io/badge/Docker-1F2937?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/Forgejo_CI-0F766E?style=for-the-badge&logo=forgejo&logoColor=white" alt="Forgejo CI" />
+</p>
 
 **No es un laboratorio de prueba: es infraestructura productiva.** No tiene la
 escala de una empresa, pero tiene todas sus piezas -virtualizacion, red
