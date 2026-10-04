@@ -106,7 +106,7 @@ flowchart LR
 | [Alerts That Matter](https://github.com/Nicolasperaltait/alerts-that-matter) | alertas, SIEM y controles que se verifican por su efecto | 7 controles que mentian |
 | [Backups That Don't Lie](https://github.com/Nicolasperaltait/backups-that-dont-lie) | backups medidos por su contenido y restauracion probada | RTO de segundos |
 | [Hypervisor as Control Plane](https://github.com/Nicolasperaltait/hypervisor-as-control-plane) | el hipervisor operado como plataforma productiva | reboot verificado, no supuesto |
-| [SecOps in Production](https://github.com/Nicolasperaltait/secops-in-production) | SOC, SIEM, endurecimiento medido y lo que se decidio no hacer | SOC completo |
+| [SecOps Governance Blueprint](https://github.com/Nicolasperaltait/secops-governance-blueprint) | SOC, SIEM, endurecimiento medido y lo que se decidio no hacer | SOC completo |
 
 ## Casos de estudio
 
