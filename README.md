@@ -1,5 +1,7 @@
 # Homelab Prod
 
+**Idioma / Language:** Espanol | [English - full overview](docs/en/README.md)
+
 ![Caratula conceptual de Homelab Prod: infraestructura productiva 24/7](docs/img/cover-conceptual.png)
 
 <sub>Representacion conceptual de las piezas de la plataforma; no es una captura ni un mapa exacto del entorno.</sub>
@@ -54,7 +56,7 @@ alertas que avisan solas y controles que se prueban haciendolos fallar.
 
 ## En vivo
 
-_Capturas reales del entorno, con nombres, direcciones, usuarios y versiones reemplazados por su funcion._
+_Capturas reales del entorno, con nombres, direcciones, usuarios y versiones reemplazados por su funcion. Las cifras siguientes describen esas capturas, no un estado en vivo._
 
 ![Tablero propio de operaciones](docs/img/homepage-noc.png)
 <sub>Tablero propio de operaciones: estado, parches, salud, backups, seguridad, red y desarrollo en una sola pantalla.</sub>
@@ -112,6 +114,18 @@ flowchart LR
 | [Hypervisor as Control Plane](https://github.com/Nicolasperaltait/hypervisor-as-control-plane) | el hipervisor operado como plataforma productiva | reboot verificado, no supuesto |
 | [SecOps Governance Blueprint](https://github.com/Nicolasperaltait/secops-governance-blueprint) | SOC, SIEM, endurecimiento medido y lo que se decidio no hacer | SOC completo |
 
+## Otros proyectos
+
+Aplicaciones y automatizacion propias, con sus repositorios publicos:
+
+| Repo | De que trata |
+|---|---|
+| [Debian Scripts](https://github.com/Nicolasperaltait/debian-scripts) | automatizacion modular de sistemas Linux con Bash |
+| [Faraday ParanoIA](https://github.com/Nicolasperaltait/faraday-paranoIA) | IA local y busqueda documental con fuentes |
+| [WA Audio Local Transcriber](https://github.com/Nicolasperaltait/wa-audio-local-transcriber) | transcripcion local de audios de WhatsApp |
+
+Todos los repositorios: [portfolio de Nicolas en GitHub](https://github.com/Nicolasperaltait).
+
 ## Casos de estudio
 
 | Caso | Que muestra |
@@ -141,13 +155,9 @@ flowchart LR
 
 ## In English
 
-**Not a test lab: production infrastructure.** Small in scale, complete in
-parts -virtualization, segmented network, DNS, storage, backups with an offsite
-copy, monitoring, SIEM, remote access, applications in real use and a private
-code remote- running 24/7 on a type-1 hypervisor (Proxmox VE) on a dedicated
-server. Same rules as an enterprise environment, at small scale: planned
-changes with rollback, evidence, alerts that fire on their own and controls
-tested by making them fail. Full documentation in [English](docs/en/01-executive-summary.md).
+Read the [complete English overview](docs/en/README.md): architecture, operational
+evidence, screenshots, eight case studies and links to the related repositories.
+All eight technical chapters and all eight case studies have English versions.
 
 ## Que no se publica, y por que
 
