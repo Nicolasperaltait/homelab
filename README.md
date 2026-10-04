@@ -48,6 +48,22 @@ repo, con el detalle, las cifras y los casos (ver [La serie](#la-serie)).
 Lo mismo que en una empresa, en chico: cambios con plan y rollback, evidencia,
 alertas que avisan solas y controles que se prueban haciendolos fallar.
 
+## En vivo
+
+_Capturas reales del entorno, con nombres, direcciones, usuarios y versiones reemplazados por su funcion._
+
+![Proxmox VE con nueve maquinas por funcion](docs/img/proxmox-datacenter.png)
+<sub>Proxmox VE: nueve maquinas, una por funcion, con 12 dias de uptime.</sub>
+
+![Grafana con 13 exporters y 25 sondas en verde](docs/img/grafana-salud.png)
+<sub>Grafana: 13 exporters y 25 sondas de disponibilidad, cero caidas.</sub>
+
+![Forgejo con repositorios privados](docs/img/forgejo-repos.png)
+<sub>Forgejo: todo el codigo vive en un remoto propio y privado.</sub>
+
+![Integracion continua en verde](docs/img/forgejo-ci.png)
+<sub>Integracion continua: cada commit corre los tests.</sub>
+
 ## Arquitectura
 
 ```mermaid
