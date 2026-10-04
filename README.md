@@ -52,6 +52,9 @@ alertas que avisan solas y controles que se prueban haciendolos fallar.
 
 _Capturas reales del entorno, con nombres, direcciones, usuarios y versiones reemplazados por su funcion._
 
+![Tablero propio de operaciones](docs/img/homepage-noc.png)
+<sub>Tablero propio de operaciones: estado, parches, salud, backups, seguridad, red y desarrollo en una sola pantalla.</sub>
+
 ![Proxmox VE con nueve maquinas por funcion](docs/img/proxmox-datacenter.png)
 <sub>Proxmox VE: nueve maquinas, una por funcion, con 12 dias de uptime.</sub>
 
