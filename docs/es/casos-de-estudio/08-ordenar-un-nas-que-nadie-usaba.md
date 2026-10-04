@@ -163,6 +163,70 @@ configuracion lo reactiva salvo que su propia configuracion diga lo contrario.
 **Correccion:** el apagado se movio a la configuracion del gestor, y recien despues se
 aplico, verificando que el servicio siguiera apagado.
 
+## Una semana despues: la utilidad que no fue
+
+Ocho dias mas tarde, la carpeta de intercambio **estaba vacia**. Nadie la habia usado.
+Tres puertas para una carpeta no eran lo que hacia falta.
+
+La pregunta cambio de "que se le puede agregar al NAS" a **"que problema real tiene su
+dueno"**. La respuesta fue concreta: *me piden un documento y no lo puedo conseguir*, y
+*quiero poder volver a una version vieja*. Se descartaron a proposito las salidas
+tipicas: galeria de fotos, servidor de peliculas y una suite tipo nube completa.
+
+### Un disco de red, el mismo en todos lados
+
+La solucion fue la mas simple: **montar el NAS entero como un disco mas** en cada
+equipo, siempre por la direccion del NAS dentro de la malla de acceso remoto. Es la
+misma direccion en casa y afuera, y el trafico va cifrado.
+
+| Equipo | Como |
+|---|---|
+| PC de escritorio | unidad de red, como antes |
+| Notebook Linux | montaje automatico: se conecta al abrir la carpeta y se suelta sin uso |
+| Telefono | explorador de archivos con cliente de red |
+
+Sin copia local: el dueno no trabaja sin conexion, y montado no hay nada que
+sincronizar. Una carpeta nueva aparece sola en los tres.
+
+**Las versiones viejas ya existian.** El espejo de respaldos guardaba versiones desde
+hacia semanas; lo que faltaba era **poder llegar a ellas**: el recurso compartido oculta
+las carpetas que empiezan con punto, y ahi viven. Desde la notebook y el telefono se ven.
+
+Se comparo contra una suite de nube completa (web, apps, links para compartir). Se
+descarto por el costo: base de datos, cache, mas memoria y actualizaciones mayores que
+mantener, para dos necesidades que un disco de red ya cubria. Queda la puerta abierta:
+puede montarse despues sobre las mismas carpetas.
+
+### Lo que habia quedado mal la semana anterior
+
+**El explorador web "por la malla" nunca habia funcionado.** Se probo el 25/09 solo desde
+casa. Desde la malla, la conexion colgaba con la regla del firewall del host bien
+escrita: la **politica de la malla** no permitia ese puerto, y como el paquete no llega
+al host, su firewall no registra nada. Lo mismo le pasaba a la sincronizacion del
+telefono fuera de casa. Se agrego el permiso **y una prueba en la propia politica**, que
+hace rechazar cualquier cambio futuro que lo vuelva a cerrar.
+
+**Lo sincronizado no aparecia en el recurso compartido.** Estaba en el disco y no en la
+unidad de red. Se corrigieron los permisos de la carpeta y la mascara con la que el
+servicio de sincronizacion crea los archivos. Quedo funcionando, **con la causa exacta
+sin confirmar**: la hipotesis inicial no cerraba con los permisos que tenia el archivo.
+Se registro asi, sin inventar una explicacion.
+
+### Errores propios, sin adornos
+
+- Un reemplazo de texto con una ruta de Windows interpreto las barras invertidas como
+  secuencias de escape y **rompio dos documentos**. Se repararon armando la barra fuera
+  del reemplazo.
+- Un bloque para la notebook **no decia en que maquina correrlo**, y se corrio en la PC.
+- Otro bloque usaba un formato de ruta que la terminal del operador no entiende.
+
+### Lo que queda abierto, dicho de frente
+
+- Lo que el dueno cree directamente en el NAS **no tiene respaldo**: los respaldos
+  copian rutas fijas que vienen de la PC.
+- La notebook guarda una credencial con escritura sobre todo el NAS y **su disco no esta
+  cifrado**. Paso a prioridad alta.
+
 ## Patrones
 
 1. **Persistir en la configuracion que manda.** Una ruta agregada a mano, un servicio
@@ -175,6 +239,10 @@ aplico, verificando que el servicio siguiera apagado.
 4. **La interfaz no es la configuracion.** Cuando pantalla y sintoma no coinciden, leer la
    configuracion cruda.
 5. **Un vacio no es un "no".** Verificar primero que la consulta puede ver.
+6. **La utilidad se mide en uso, no en funciones.** Una carpeta vacia a la semana dice mas
+   que tres puertas funcionando. Preguntar por el problema, no por la herramienta.
+7. **Desde la malla hay dos filtros.** Un puerto para usar desde afuera necesita la regla
+   del host **y** el permiso de la malla, y se prueba contra la direccion de la malla.
 
 ## Resultado
 
@@ -187,3 +255,4 @@ aplico, verificando que el servicio siguiera apagado.
 | agente del SIEM caido sin aviso | alerta dedicada |
 | margen del 6 % sobre el umbral de respaldo | margen de mas del 40 % |
 | sin uso para su dueno | carpeta de intercambio con navegador, sincronizacion y red |
+| carpeta de intercambio vacia a la semana | el NAS entero como disco en PC, notebook y telefono, con versiones al alcance |

@@ -161,6 +161,70 @@ re-enables it unless its own configuration says otherwise.
 **Fix:** the disable moved into the manager's configuration, and only then was it applied,
 verifying the service stayed off.
 
+## A week later: the purpose that wasn't
+
+Eight days later, the exchange folder **was empty**. Nobody had used it. Three doors to
+one folder were not what was needed.
+
+The question changed from "what can we add to the NAS" to **"what real problem does its
+owner have"**. The answer was concrete: *someone asks me for a document and I can't get
+to it*, and *I want to go back to an old version*. The usual answers were deliberately
+ruled out: photo gallery, movie server, and a full cloud suite.
+
+### One network drive, the same everywhere
+
+The fix was the simplest one: **mount the whole NAS as one more drive** on each device,
+always through the NAS address inside the remote-access mesh. It is the same address at
+home and away, and traffic is encrypted.
+
+| Device | How |
+|---|---|
+| Desktop PC | network drive, as before |
+| Linux laptop | automount: connects when the folder is opened, releases when idle |
+| Phone | file manager with a network client |
+
+No local copy: the owner does not work offline, and with a mount there is nothing to
+sync. A new folder shows up on all three on its own.
+
+**Old versions already existed.** The backup mirror had been keeping versions for
+weeks; what was missing was **a way to reach them**: the file share hides folders whose
+names start with a dot, and that is where they live. From the laptop and phone they show.
+
+A full cloud suite (web, apps, share links) was compared and ruled out on cost: a
+database, a cache, more memory and major upgrades to maintain, for two needs a network
+drive already covered. The door stays open: it can be mounted later over the same folders.
+
+### What had been wrong the week before
+
+**The web explorer "over the mesh" had never worked.** On the first day it was tested
+only from home. Over the mesh the connection hung while the host firewall rule was
+correct: the **mesh policy** did not allow that port, and since the packet never
+reaches the host, its firewall logs nothing. The phone's sync away from home had the
+same problem. The permission was added **along with a test in the policy itself**,
+which makes any future change that closes it again get rejected.
+
+**Synced files did not show up on the file share.** They were on disk and not on the
+network drive. The folder permissions and the mask the sync service creates files with
+were fixed. It works now, **with the exact cause unconfirmed**: the first hypothesis did
+not match the permissions the file actually had. It was recorded that way, without
+inventing an explanation.
+
+### Own mistakes, told plainly
+
+- A text replacement containing a Windows path read the backslashes as escape sequences
+  and **broke two documents**. They were repaired by building the backslash outside the
+  replacement.
+- A block meant for the laptop **did not say which machine to run it on**, and it was
+  run on the PC.
+- Another block used a path format the operator's terminal does not understand.
+
+### What remains open, said plainly
+
+- What the owner creates directly on the NAS **has no backup**: backups copy fixed paths
+  that come from the PC.
+- The laptop stores a credential with write access to the whole NAS and **its disk is not
+  encrypted**. It moved to high priority.
+
 ## Patterns
 
 1. **Persist in the configuration that rules.** A route added by hand, a service masked
@@ -172,6 +236,10 @@ verifying the service stayed off.
 4. **The interface is not the configuration.** When screen and symptom disagree, read the
    raw configuration.
 5. **An empty result is not a "no".** First verify the query can see.
+6. **Usefulness is measured in use, not features.** A folder empty after a week says more
+   than three working doors. Ask about the problem, not the tool.
+7. **From the mesh there are two filters.** A port meant for remote use needs the host
+   rule **and** the mesh permission, and is tested against the mesh address.
 
 ## Outcome
 
@@ -184,3 +252,4 @@ verifying the service stayed off.
 | SIEM agent down with no warning | dedicated alert |
 | ~6 % margin over the backup threshold | over 40 % margin |
 | no use for its owner | exchange folder with browser, sync and network share |
+| exchange folder empty after a week | the whole NAS as a drive on PC, laptop and phone, with versions within reach |
