@@ -61,6 +61,9 @@ _Capturas reales del entorno, con nombres, direcciones, usuarios y versiones ree
 ![Grafana con 13 exporters y 25 sondas en verde](docs/img/grafana-salud.png)
 <sub>Grafana: 13 exporters y 25 sondas de disponibilidad, cero caidas.</sub>
 
+![Contenedores en produccion](docs/img/grafana-docker.png)
+<sub>15 contenedores en produccion con su consumo en tiempo real.</sub>
+
 ![Forgejo con repositorios privados](docs/img/forgejo-repos.png)
 <sub>Forgejo: todo el codigo vive en un remoto propio y privado.</sub>
 
