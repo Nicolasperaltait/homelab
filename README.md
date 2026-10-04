@@ -3,13 +3,13 @@
 > Infraestructura productiva de una sola persona: chica en escala, completa en piezas, encendida 24/7.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Proxmox_VE-1F2937?style=for-the-badge&logo=proxmox&logoColor=white" alt="Proxmox VE" />
-  <img src="https://img.shields.io/badge/Wazuh_SIEM-B91C1C?style=for-the-badge&logo=wazuh&logoColor=white" alt="Wazuh SIEM" />
-  <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white" alt="Grafana" />
-  <img src="https://img.shields.io/badge/Tailscale-242424?style=for-the-badge&logo=tailscale&logoColor=white" alt="Tailscale" />
-  <img src="https://img.shields.io/badge/Pi--hole-111827?style=for-the-badge&logo=pihole&logoColor=white" alt="Pi-hole" />
-  <img src="https://img.shields.io/badge/Docker-1F2937?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
-  <img src="https://img.shields.io/badge/Forgejo_CI-0F766E?style=for-the-badge&logo=forgejo&logoColor=white" alt="Forgejo CI" />
+  <img src="https://img.shields.io/badge/Proxmox_VE-2563EB?style=for-the-badge&logo=proxmox&logoColor=white" alt="Proxmox VE" />
+  <img src="https://img.shields.io/badge/Wazuh_SIEM-BE123C?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxIDMgNXY2YzAgNS42IDMuOCAxMC43IDkgMTIgNS4yLTEuMyA5LTYuNCA5LTEyVjV6Ii8%2BPC9zdmc%2B&logoColor=white" alt="Wazuh SIEM" />
+  <img src="https://img.shields.io/badge/Grafana-D97706?style=for-the-badge&logo=grafana&logoColor=white" alt="Grafana" />
+  <img src="https://img.shields.io/badge/Tailscale-7C3AED?style=for-the-badge&logo=tailscale&logoColor=white" alt="Tailscale" />
+  <img src="https://img.shields.io/badge/Pi--hole-DC2626?style=for-the-badge&logo=pihole&logoColor=white" alt="Pi-hole" />
+  <img src="https://img.shields.io/badge/Docker-2563EB?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/Forgejo_CI-059669?style=for-the-badge&logo=forgejo&logoColor=white" alt="Forgejo CI" />
 </p>
 
 **No es un laboratorio de prueba: es infraestructura productiva.** No tiene la
