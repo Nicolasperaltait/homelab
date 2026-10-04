@@ -1,5 +1,9 @@
 # Homelab Prod
 
+![Caratula conceptual de Homelab Prod: infraestructura productiva 24/7](docs/img/cover-conceptual.png)
+
+<sub>Representacion conceptual de las piezas de la plataforma; no es una captura ni un mapa exacto del entorno.</sub>
+
 > Infraestructura productiva de una sola persona: chica en escala, completa en piezas, encendida 24/7.
 
 <p align="center">
