@@ -2,7 +2,7 @@
 
 ## Context
 
-The lab has a virtualized NAS that receives the workstation backups. It worked: backups
+The infrastructure has a virtualized NAS that receives the workstation backups. It worked: backups
 ran every night and the metrics were green. But it had accumulated months of layers:
 
 - accounts from a previous job that no longer applied;
@@ -75,7 +75,7 @@ ask what it actually needs.
   **without reading it** (it could contain a secret);
 - network discovery and unused services turned off;
 - minimum file-sharing protocol raised to the modern version;
-- access from outside home only through the remote-access mesh, **never exposed to the
+- access from off-site only through the remote-access mesh, **never exposed to the
   internet**;
 - all updates applied with a **prior VM snapshot**, a reboot, and a post-check that looks
   at **connectivity**, not just services: routes, reachability of internal zones and the
@@ -92,7 +92,7 @@ A single exchange folder was created with three ways in:
 
 | Door | What for |
 |---|---|
-| Web explorer | upload and download from any device, at home or over the remote mesh |
+| Web explorer | upload and download from any device, on-site or over the remote mesh |
 | File synchronization | what is dropped on the PC shows up on the NAS and the phone |
 | File share | as one more network drive |
 
@@ -175,7 +175,7 @@ ruled out: photo gallery, movie server, and a full cloud suite.
 
 The fix was the simplest one: **mount the whole NAS as one more drive** on each device,
 always through the NAS address inside the remote-access mesh. It is the same address at
-home and away, and traffic is encrypted.
+on-site and off-site, and traffic is encrypted.
 
 | Device | How |
 |---|---|
@@ -197,9 +197,9 @@ drive already covered. The door stays open: it can be mounted later over the sam
 ### What had been wrong the week before
 
 **The web explorer "over the mesh" had never worked.** On the first day it was tested
-only from home. Over the mesh the connection hung while the host firewall rule was
+only on-site. Over the mesh the connection hung while the host firewall rule was
 correct: the **mesh policy** did not allow that port, and since the packet never
-reaches the host, its firewall logs nothing. The phone's sync away from home had the
+reaches the host, its firewall logs nothing. The phone's sync off-site had the
 same problem. The permission was added **along with a test in the policy itself**,
 which makes any future change that closes it again get rejected.
 

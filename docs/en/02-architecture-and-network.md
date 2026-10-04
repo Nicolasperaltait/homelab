@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the homelab architecture in a clear, sanitized way.
+Describe the infrastructure architecture in a clear, sanitized way.
 
 ## Design principles
 
@@ -53,7 +53,7 @@ flowchart TB
 
 ## Architectural reasoning
 
-The home physical network is not designed for advanced segmentation, so
+The physical network gear is not designed for advanced segmentation, so
 isolation is implemented on the hypervisor. That makes it doubly critical:
 
 - compute platform
@@ -67,7 +67,7 @@ isolation is implemented on the hypervisor. That makes it doubly critical:
 | Internal DNS | filtering resolver | internal resolution, served by DHCP to the whole network |
 | App platform | container runtime on a VM | in-house applications and internal services |
 | Proxy | managed reverse proxy | internal publication of web services |
-| Code remote | self-hosted git forge with CI | own repositories and pipelines |
+| Code remote | self-hosted Forgejo instance with CI | own repositories and pipelines |
 | SIEM | open-source SIEM platform | events, agents and evidence |
 | Monitoring | metrics TSDB + dashboard and alerting layer | health, freshness and notifications |
 | NAS | open-source NAS solution | backups, workstation mirror and offsite copy |
@@ -83,7 +83,7 @@ isolation is implemented on the hypervisor. That makes it doubly critical:
 | Internal DNS | if it fails, many services look down |
 | Storage | affects backups, retention and recovery |
 | Container platform | concentrates apps, proxy and observability |
-| Mesh gateway | it is the only access from outside home |
+| Mesh gateway | it is the only access from off-site |
 
 ## Boot order
 

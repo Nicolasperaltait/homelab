@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the homelab backup and recovery strategy.
+Describe the infrastructure backup and recovery strategy.
 
 ## Principles
 
@@ -24,7 +24,7 @@ Describe the homelab backup and recovery strategy.
 | Data by domain | service configuration and data, packaged and hash-verified |
 | Workstation mirror | continuous sync of the data disk to the NAS |
 | Workstation configuration backup | nightly encrypted archive of the work profile |
-| Code remote | full repository history, at home |
+| Code remote | full repository history, on-site |
 | Offsite copy | encrypted copy of the critical domains |
 | Restore tests | evidence that recovery is real |
 | Evidence | metrics, events and alerts |
@@ -121,7 +121,7 @@ found while updating this documentation.
 | Snapshot | fast rollback before a change; created with a retirement date |
 | Backup | portable recovery |
 | Offsite copy | resilience against local loss |
-| Code remote at home | history and collaboration; **not** an offsite copy |
+| On-site code remote | history and collaboration; **not** an offsite copy |
 | Restore test | evidence that recovery is real |
 | Alert | actionable signal, not a replacement for validation |
 
@@ -142,7 +142,7 @@ found while updating this documentation.
 | High | hypervisor, internal DNS, storage, mesh gateway, app platform |
 | High | critical service data and configuration, code remote |
 | Medium | observability and dashboards |
-| Variable | auxiliary or lab services |
+| Variable | auxiliary or test services |
 
 ## Open risks
 

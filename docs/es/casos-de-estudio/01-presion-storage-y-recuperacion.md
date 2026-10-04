@@ -2,7 +2,7 @@
 
 ## Contexto
 
-El lab depende del storage local para backups operativos y artefactos de recuperacion. Un escenario de presion de storage expuso la diferencia entre tener archivos de backup y tener una postura real de recuperacion.
+La infraestructura depende del storage local para backups operativos y artefactos de recuperacion. Un escenario de presion de storage expuso la diferencia entre tener archivos de backup y tener una postura real de recuperacion.
 
 ## Sintoma
 

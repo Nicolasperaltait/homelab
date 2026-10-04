@@ -2,7 +2,7 @@
 
 ## Contexto
 
-El lab separa servicios e infraestructura en zonas funcionales. Esa segmentacion aporta seguridad, pero el monitoreo a veces requiere trafico entre zonas cuidadosamente justificado.
+La infraestructura separa servicios e infraestructura en zonas funcionales. Esa segmentacion aporta seguridad, pero el monitoreo a veces requiere trafico entre zonas cuidadosamente justificado.
 
 ## Sintoma
 

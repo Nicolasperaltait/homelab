@@ -31,7 +31,7 @@ hipervisor:
 flowchart TB
     Internet[Internet] -.->|ningun puerto entrante| Borde[Router de borde]
     Operador[Operador] --> Mgmt[Zona de administracion]
-    Remoto[Operador fuera de casa] -->|malla con identidad por nodo| Gw[Puerta de la malla]
+    Remoto[Operador fuera del sitio] -->|malla con identidad por nodo| Gw[Puerta de la malla]
     Gw --> Mgmt
     Agente[Agentes de IA] -->|unico camino| Salto[Host de salto con interruptor]
     Salto --> Mgmt

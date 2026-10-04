@@ -2,8 +2,7 @@
 
 ## Contexto
 
-Durante una semana de endurecimiento sobre una plataforma de laboratorio
-productivo se aplicaron cambios en accesos, privilegios, auditoria y filtrado de
+Durante una semana de endurecimiento sobre una infraestructura productiva se aplicaron cambios en accesos, privilegios, auditoria y filtrado de
 red. Cada cambio se acompano de un script que verificaba su propio resultado.
 
 **El patron mas frecuente de la semana no fue un cambio que fallara. Fue una

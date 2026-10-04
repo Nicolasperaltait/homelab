@@ -4,7 +4,7 @@
 
 ## Proposito
 
-Describir la estrategia de backup y recuperacion del homelab.
+Describir la estrategia de backup y recuperacion de la infraestructura.
 
 ## Principios
 
@@ -24,7 +24,7 @@ Describir la estrategia de backup y recuperacion del homelab.
 | Datos por dominio | configuraciones y datos de servicios, empaquetados y verificados por hash |
 | Espejo de la estacion de trabajo | sincronizacion continua del disco de datos hacia el NAS |
 | Respaldo de configuracion de la estacion | archivo cifrado nocturno del perfil de trabajo |
-| Remoto de codigo | historial completo de los repositorios, dentro de casa |
+| Remoto de codigo | historial completo de los repositorios, en el mismo sitio |
 | Copia fuera del sitio | copia cifrada de los dominios criticos |
 | Pruebas de restauracion | evidencia de que la recuperacion es real |
 | Evidencia | metricas, eventos y alertas |
@@ -119,7 +119,7 @@ restauracion atrasada*. Se detecto al actualizar esta documentacion.
 | Instantanea | rollback rapido antes de un cambio; se crea con fecha de retiro |
 | Backup | recuperacion portable |
 | Copia fuera del sitio | resiliencia ante perdida local |
-| Remoto de codigo en casa | historial y colaboracion; **no** es una copia fuera del sitio |
+| Remoto de codigo en el mismo sitio | historial y colaboracion; **no** es una copia fuera del sitio |
 | Prueba de restauracion | evidencia de que la recuperacion es real |
 | Alerta | senal accionable, no reemplazo de la validacion |
 
@@ -140,7 +140,7 @@ restauracion atrasada*. Se detecto al actualizar esta documentacion.
 | Alta | hipervisor, DNS interno, storage, puerta de la malla, plataforma de apps |
 | Alta | datos y configuracion de servicios criticos, remoto de codigo |
 | Media | observabilidad y dashboards |
-| Variable | servicios auxiliares o de laboratorio |
+| Variable | servicios auxiliares o de prueba |
 
 ## Riesgos abiertos
 
@@ -148,7 +148,7 @@ restauracion atrasada*. Se detecto al actualizar esta documentacion.
 |---|---|
 | corrida periodica de las pruebas de restauracion | interrumpida; reanudar y alertar por atraso |
 | respaldo de imagen de todas las VMs | parcial: algunas maquinas solo respaldan datos |
-| copia fuera de casa del remoto de codigo | pendiente, a medio externo |
+| copia fuera del sitio del remoto de codigo | pendiente, a medio externo |
 | redundancia fisica de storage | un disco de soporte fallo; reemplazo postergado |
 
 ## Idea central

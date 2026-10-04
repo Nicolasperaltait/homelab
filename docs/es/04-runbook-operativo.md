@@ -4,7 +4,7 @@
 
 ## Proposito
 
-Resumir como se opera el homelab sin exponer detalles sensibles. No reemplaza la
+Resumir como se opera la infraestructura sin exponer detalles sensibles. No reemplaza la
 documentacion interna; es su version presentable.
 
 ## Como se opera en la practica

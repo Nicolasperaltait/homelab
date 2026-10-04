@@ -126,7 +126,7 @@ flowchart TD
 | Alta | Pruebas de restauracion con alerta por atraso | hoy pueden dejar de correr sin aviso |
 | Alta | Arranque confiable de todas las VMs | un reinicio real dejo dos maquinas apagadas |
 | Alta | Respaldo de imagen para todas las VMs | algunas solo respaldan datos |
-| Alta | Copia externa del remoto de codigo | un remoto en casa no es copia fuera del sitio |
+| Alta | Copia externa del remoto de codigo | un remoto en el mismo sitio no es copia fuera del sitio |
 | Media | Completar filtrado por host | cerrar la brecha medida |
 | Media | Autenticacion en las apps propias | no depender solo del tunel |
 | Media | Segundo resolver DNS | punto unico de falla |

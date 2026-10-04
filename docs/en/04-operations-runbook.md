@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Summarize how the homelab is operated without exposing sensitive details. It does
+Summarize how the infrastructure is operated without exposing sensitive details. It does
 not replace the internal documentation; it is its presentable version.
 
 ## How it is operated in practice

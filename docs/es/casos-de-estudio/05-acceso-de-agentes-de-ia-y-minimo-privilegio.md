@@ -2,8 +2,7 @@
 
 ## Contexto
 
-Un asistente de IA participaba de la operacion de una plataforma de laboratorio
-productivo: diagnostico, preparacion de cambios, revision de configuracion y
+Un asistente de IA participaba de la operacion de una infraestructura productiva: diagnostico, preparacion de cambios, revision de configuracion y
 documentacion. Para hacerlo necesitaba llegar a los hosts.
 
 El planteo inicial era el habitual: darle una clave por host, con permisos

@@ -4,7 +4,7 @@
 
 ## Proposito
 
-Documentar el enfoque de seguridad del homelab sin exponer detalles sensibles.
+Documentar el enfoque de seguridad de la infraestructura sin exponer detalles sensibles.
 
 ## Modelo de seguridad
 
@@ -169,10 +169,10 @@ correspondia con la realidad**. Detalle en [Caso 06](casos-de-estudio/06-cuando-
 ```mermaid
 flowchart TD
     A[Internet] -.->|ningun puerto entrante| B[Borde]
-    C[Operador en casa] --> D[DNS interno]
+    C[Operador en el sitio] --> D[DNS interno]
     C --> E[Servicios internos]
     C --> F[Paneles administrativos]
-    M[Operador fuera de casa] -->|malla, politica por puerto| C
+    M[Operador fuera del sitio] -->|malla, politica por puerto| C
     J[Agentes de IA] -->|host de salto encendido a mano| F
     H[Actor no autorizado] -.->|no publicado| F
     N[Equipo nuevo en la malla] -.->|sin firma, no entra| C
@@ -180,7 +180,7 @@ flowchart TD
 
 ## Idea central
 
-La seguridad de este homelab no se apoya en una herramienta. Se apoya en:
+La seguridad de esta infraestructura no se apoya en una herramienta. Se apoya en:
 
 - ninguna exposicion entrante
 - segmentacion y minimo privilegio medido

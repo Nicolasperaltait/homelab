@@ -2,7 +2,7 @@
 
 ## Context
 
-An AI assistant took part in operating a small production-grade lab platform:
+An AI assistant took part in operating a small production infrastructure:
 diagnosis, change preparation, configuration review and documentation. To do
 that, it needed to reach the hosts.
 

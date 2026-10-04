@@ -125,7 +125,7 @@ flowchart TD
 | High | Restore tests with a lateness alert | today they can stop running silently |
 | High | Reliable startup of every VM | a real reboot left two machines off |
 | High | Image backup for every VM | some only back up data |
-| High | External copy of the code remote | a remote at home is not an offsite copy |
+| High | External copy of the code remote | an on-site remote is not an offsite copy |
 | Medium | Complete per-host filtering | close the measured gap |
 | Medium | Authentication in the in-house apps | do not rely only on the tunnel |
 | Medium | Second DNS resolver | single point of failure |

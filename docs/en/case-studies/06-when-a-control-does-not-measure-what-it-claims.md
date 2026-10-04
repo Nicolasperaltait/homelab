@@ -2,7 +2,7 @@
 
 ## Context
 
-Over a week of hardening a small production-grade lab platform, changes were made
+Over a week of hardening a small production infrastructure, changes were made
 to access, privilege, auditing and network filtering. Every change shipped with a
 script that verified its own result.
 

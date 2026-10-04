@@ -31,7 +31,7 @@ hypervisor:
 flowchart TB
     Internet[Internet] -.->|no inbound port| Edge[Edge router]
     Operator[Operator] --> Mgmt[Management zone]
-    Remote[Operator away from home] -->|mesh with per-node identity| Gw[Mesh gateway]
+    Remote[Operator off-site] -->|mesh with per-node identity| Gw[Mesh gateway]
     Gw --> Mgmt
     Agent[AI agents] -->|single path| Jump[Jump host with a switch]
     Jump --> Mgmt

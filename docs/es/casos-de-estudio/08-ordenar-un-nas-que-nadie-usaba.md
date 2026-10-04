@@ -2,7 +2,7 @@
 
 ## Contexto
 
-El laboratorio tiene un NAS virtualizado que recibe los respaldos de la estacion de
+La infraestructura tiene un NAS virtualizado que recibe los respaldos de la estacion de
 trabajo. Funcionaba: los respaldos corrian todas las noches y las metricas estaban en
 verde. Pero acumulaba meses de capas:
 
@@ -76,7 +76,7 @@ preguntar que necesita realmente.
   canal viejo movido **sin leerlo** (podia contener un secreto);
 - descubrimiento de red y servicios sin uso apagados;
 - protocolo minimo de archivos compartidos elevado a la version moderna;
-- el acceso desde fuera de casa solo por la malla de acceso remoto, **nunca expuesto a
+- el acceso desde fuera del sitio solo por la malla de acceso remoto, **nunca expuesto a
   internet**;
 - todas las actualizaciones aplicadas con **instantanea previa de la VM**, reinicio, y
   un chequeo posterior que mira **conectividad**, no solo servicios: rutas, alcance a las
@@ -94,7 +94,7 @@ Se creo una unica carpeta de intercambio con tres formas de llegar:
 
 | Puerta | Para que |
 |---|---|
-| Navegador web | subir y bajar desde cualquier equipo, en casa o por la malla remota |
+| Navegador web | subir y bajar desde cualquier equipo, en el sitio o por la malla remota |
 | Sincronizacion de archivos | lo que se deja en la PC aparece en el NAS y en el telefono |
 | Recurso compartido | como una unidad de red mas |
 
@@ -177,7 +177,7 @@ tipicas: galeria de fotos, servidor de peliculas y una suite tipo nube completa.
 
 La solucion fue la mas simple: **montar el NAS entero como un disco mas** en cada
 equipo, siempre por la direccion del NAS dentro de la malla de acceso remoto. Es la
-misma direccion en casa y afuera, y el trafico va cifrado.
+misma direccion en el sitio y afuera, y el trafico va cifrado.
 
 | Equipo | Como |
 |---|---|
@@ -199,11 +199,10 @@ puede montarse despues sobre las mismas carpetas.
 
 ### Lo que habia quedado mal la semana anterior
 
-**El explorador web "por la malla" nunca habia funcionado.** Se probo el 25/09 solo desde
-casa. Desde la malla, la conexion colgaba con la regla del firewall del host bien
+**El explorador web "por la malla" nunca habia funcionado.** Se probo el 25/09 solo desde el sitio. Desde la malla, la conexion colgaba con la regla del firewall del host bien
 escrita: la **politica de la malla** no permitia ese puerto, y como el paquete no llega
 al host, su firewall no registra nada. Lo mismo le pasaba a la sincronizacion del
-telefono fuera de casa. Se agrego el permiso **y una prueba en la propia politica**, que
+telefono fuera del sitio. Se agrego el permiso **y una prueba en la propia politica**, que
 hace rechazar cualquier cambio futuro que lo vuelva a cerrar.
 
 **Lo sincronizado no aparecia en el recurso compartido.** Estaba en el disco y no en la

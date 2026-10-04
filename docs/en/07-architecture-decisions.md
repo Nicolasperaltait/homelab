@@ -41,11 +41,11 @@ What was decided and later undone is also documented:
 | Own VPN tunnel with an inbound port | contradicted the closed-edge principle |
 | Chat channel for alerts | never delivered a single notice |
 | Dedicated dashboard console | messaging alerts made it unnecessary |
-| Local AI services in the lab | not used; retired with their history archived |
+| Local AI services in the infrastructure | not used; retired with their history archived |
 | A self-hosted credentials service | not used; its retirement is in progress |
 
 ## How to read it
 
-> The lab is small, but it is designed as a platform: segmented, with no inbound
+> The infrastructure is small, but it is designed as a platform: segmented, with no inbound
 > exposure, observable, recoverable with evidence, and documented with its
 > tradeoffs, its mistakes and what is still missing.

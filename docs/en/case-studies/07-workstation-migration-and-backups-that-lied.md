@@ -2,7 +2,7 @@
 
 ## Context
 
-The lab's main workstation needed to be reinstallable. Nobody dared, because
+The main workstation used to operate the infrastructure needed to be reinstallable. Nobody dared, because
 nobody knew what would be lost.
 
 The question "what do I lose if I reinstall" was answered by measuring, not by

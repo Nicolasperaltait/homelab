@@ -4,15 +4,17 @@
 
 ## Objetivo
 
-Este documento resume el homelab de forma ejecutiva y tecnica. La version publica
+Este documento resume la infraestructura de forma ejecutiva y tecnica. La version publica
 muestra criterio de arquitectura, operacion, seguridad y recuperacion sin exponer
 datos que permitan mapear o reproducir el entorno real.
 
 ## Vision general
 
-El homelab es un entorno de practica para infraestructura y ciberseguridad que
-ademas corre servicios de uso diario: aplicaciones propias, el remoto de codigo y
-los respaldos de la estacion de trabajo. La meta no es acumular servicios, sino
+Es infraestructura productiva: chica en escala, completa en piezas. Un
+hipervisor de tipo 1 (Proxmox VE) en un servidor dedicado, encendido 24/7, que
+sostiene servicios en uso real: DNS para todos los equipos, aplicaciones
+propias, el remoto de codigo y los respaldos de la estacion de trabajo. Tambien
+es el campo donde se ejercita ciberseguridad de verdad, no en un entorno de juguete. La meta no es acumular servicios, sino
 demostrar capacidad para:
 
 - disenar una arquitectura segmentada
@@ -40,7 +42,7 @@ transforma en patrones, decisiones y aprendizajes sin datos identificables.
 | Hipervisor | virtualizacion, transito entre segmentos, punto de control central |
 | DNS interno | resolucion centralizada y filtrado, servido a toda la red |
 | Plataforma de contenedores | aplicaciones propias, observabilidad y proxy inverso |
-| Remoto de codigo | repositorios propios con integracion continua, dentro de casa |
+| Remoto de codigo | repositorios propios con integracion continua, en el mismo sitio |
 | Seguridad | SIEM con agentes en los hosts y en la estacion de trabajo |
 | Observabilidad | metricas, dashboards y alertas de fallo a un canal de mensajeria |
 | Storage | NAS con respaldos, espejo de la estacion de trabajo y copia cifrada fuera del sitio |
@@ -72,7 +74,7 @@ transforma en patrones, decisiones y aprendizajes sin datos identificables.
 - corrida automatica de las pruebas de restauracion interrumpida; reanudarla
 - dos maquinas que no arrancan solas tras un reinicio del hipervisor
 - respaldo a nivel imagen para las maquinas que hoy solo respaldan datos
-- copia fuera de casa del remoto de codigo
+- copia fuera del sitio del remoto de codigo
 - segundo resolver DNS
 - reemplazo de un disco de soporte que fallo
 - completar el filtrado de red por host
@@ -92,7 +94,7 @@ transforma en patrones, decisiones y aprendizajes sin datos identificables.
 
 ## Lectura correcta
 
-Este homelab no busca parecer enterprise por decoracion. Busca mostrar algo mas
+Esta infraestructura no busca parecer enterprise por decoracion. Busca mostrar algo mas
 serio:
 
 > una infraestructura pequena, razonada, operable, explicable, y honesta sobre

@@ -4,7 +4,7 @@
 
 ## Proposito
 
-Describir la arquitectura del homelab de manera clara y sanitizada.
+Describir la arquitectura de la infraestructura de manera clara y sanitizada.
 
 ## Principios de diseno
 
@@ -83,7 +83,7 @@ aislamiento se implementa en el hipervisor. Eso lo vuelve doblemente critico:
 | DNS interno | si falla, muchos servicios parecen caidos |
 | Storage | impacta backups, retencion y recuperacion |
 | Plataforma de contenedores | concentra apps, proxy y observabilidad |
-| Puerta de la malla | es el unico acceso desde fuera de casa |
+| Puerta de la malla | es el unico acceso desde fuera del sitio |
 
 ## Orden de arranque
 

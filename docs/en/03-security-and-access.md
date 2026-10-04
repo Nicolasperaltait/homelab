@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Document the homelab security approach without exposing sensitive details.
+Document the infrastructure security approach without exposing sensitive details.
 
 ## Security model
 
@@ -168,7 +168,7 @@ reality**. Details in [Case 06](case-studies/06-when-a-control-does-not-measure-
 ```mermaid
 flowchart TD
     A[Internet] -.->|no inbound port| B[Edge]
-    C[Operator at home] --> D[Internal DNS]
+    C[Operator on-site] --> D[Internal DNS]
     C --> E[Internal services]
     C --> F[Administrative panels]
     M[Operator away] -->|mesh, per-port policy| C
@@ -179,7 +179,7 @@ flowchart TD
 
 ## Core idea
 
-The security of this homelab does not rest on one tool. It rests on:
+The security of this infrastructure does not rest on one tool. It rests on:
 
 - no inbound exposure
 - segmentation and measured least privilege

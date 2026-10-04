@@ -2,7 +2,7 @@
 
 ## Context
 
-The lab depends on local storage for operational backups and recovery artifacts. A storage pressure scenario exposed the difference between having backup files and having a reliable recovery posture.
+The infrastructure depends on local storage for operational backups and recovery artifacts. A storage pressure scenario exposed the difference between having backup files and having a reliable recovery posture.
 
 ## Symptom
 

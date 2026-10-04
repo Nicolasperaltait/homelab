@@ -2,7 +2,7 @@
 
 ## Contexto
 
-La estacion de trabajo principal del laboratorio necesitaba poder formatearse.
+La estacion de trabajo desde la que se opera la infraestructura necesitaba poder formatearse.
 Nadie se animaba, porque nadie sabia que se perderia.
 
 La pregunta "que se pierde si formateo" se contesto midiendo, no recordando. El
@@ -34,7 +34,7 @@ Correccion: la cadena se reemplazo por una sincronizacion directa, y se agrego u
 unica metrica nueva, **la edad del archivo mas reciente dentro del respaldo**, con
 alerta si se atrasa.
 
-## Hallazgo 2 - El envio fuera de casa que fallaba en silencio
+## Hallazgo 2 - El envio fuera del sitio que fallaba en silencio
 
 La copia fuera del sitio fallo varios dias seguidos sin generar una alerta.
 
@@ -131,7 +131,7 @@ Con el remoto autoalojado en marcha se limpiaron los repositorios:
   ser la unica copia de ese historial. Borrarlos no liberaba espacio util y no
   tenia vuelta atras.
 
-Un remoto dentro de la misma casa **no es una copia fuera del sitio**. Por eso el
+Un remoto en el mismo sitio **no es una copia fuera del sitio**. Por eso el
 remoto entra en los respaldos del hipervisor, y queda pendiente una copia a un
 medio externo.
 
@@ -143,7 +143,7 @@ Los tres hallazgos comparten la leccion del [Caso 06](06-cuando-un-control-no-mi
 | Control | Que media | Que tenia que medir |
 |---|---|---|
 | Metrica del respaldo | edad del comprimido | edad del contenido |
-| Aviso del envio fuera de casa | errores de un comando | resultado del proceso completo |
+| Aviso del envio fuera del sitio | errores de un comando | resultado del proceso completo |
 | Espacio libre tras borrar | lo borrado dentro del invitado | lo liberado en el anfitrion |
 
 ## Leccion

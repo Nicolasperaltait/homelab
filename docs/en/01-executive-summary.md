@@ -4,16 +4,18 @@
 
 ## Goal
 
-This document summarizes the homelab at an executive and technical level. The
+This document summarizes the infrastructure at an executive and technical level. The
 public version shows architecture, operations, security and recovery judgment
 without exposing data that would allow mapping or reproducing the real
 environment.
 
 ## Overview
 
-The homelab is a practice environment for infrastructure and cybersecurity that
-also runs daily-use services: in-house applications, the code remote and the
-workstation backups. The goal is not to accumulate services, but to demonstrate
+It is production infrastructure: small in scale, complete in parts. A type-1
+hypervisor (Proxmox VE) on a dedicated server, running 24/7, carrying services
+in real use: DNS for every device, in-house applications, the code remote and
+the workstation backups. It is also where cybersecurity is practiced for real,
+not in a toy environment. The goal is not to accumulate services, but to demonstrate
 the ability to:
 
 - design a segmented architecture
@@ -41,7 +43,7 @@ first transformed into patterns, decisions and lessons with no identifying data.
 | Hypervisor | virtualization, transit between segments, central control point |
 | Internal DNS | centralized resolution and filtering, served to the whole network |
 | Container platform | in-house applications, observability and reverse proxy |
-| Code remote | own repositories with continuous integration, at home |
+| Code remote | own repositories with continuous integration, on-site |
 | Security | SIEM with agents on the hosts and on the workstation |
 | Observability | metrics, dashboards and failure alerts to a messaging channel |
 | Storage | NAS with backups, workstation mirror and encrypted offsite copy |
@@ -93,7 +95,7 @@ first transformed into patterns, decisions and lessons with no identifying data.
 
 ## The right reading
 
-This homelab does not try to look enterprise through decoration. It tries to
+This infrastructure does not try to look enterprise through decoration. It tries to
 show something more serious:
 
 > a small infrastructure that is reasoned, operable, explainable, and honest

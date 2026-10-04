@@ -2,7 +2,7 @@
 
 ## Contexto
 
-Una plataforma de laboratorio productivo necesitaba liberar capacidad de storage
+Una infraestructura productiva necesitaba liberar capacidad de storage
 sin romper automatizaciones, backups ni observabilidad. El entorno tenia una
 dependencia fuerte entre storage, DNS, dashboards, servicios de seguridad y
 arranque automatico de maquinas virtuales.

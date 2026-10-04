@@ -25,7 +25,7 @@ costo y donde se documentan.
 | Toda tarea automatica deja una metrica | una tarea que deja de correr es invisible | un exportador mas por tarea | 06 |
 | Backups medidos por su contenido | un archivo reciente no prueba datos nuevos | metricas mas especificas | 05, caso 07 |
 | Pruebas de restauracion sin credenciales | la validacion no se vuelve un secreto a proteger | no prueba un inicio de sesion real | 05 |
-| Remoto de codigo propio | el historial no depende de un servicio externo | hay que respaldarlo y sacarlo de casa | 05 |
+| Remoto de codigo propio | el historial no depende de un servicio externo | hay que respaldarlo y sacarlo del sitio | 05 |
 | Borrar solo con cuarentena y copia verificada | un borrado apurado no tiene vuelta | espacio ocupado treinta dias | 04, caso 07 |
 | Archivar en vez de borrar lo que es ultima copia | el historial no se pierde | repositorios inactivos visibles | caso 07 |
 | Dar de baja lo que no se usa | menos superficie y menos mantenimiento | decidirlo con datos de uso | 02 |
@@ -41,11 +41,11 @@ Tambien se documenta lo que se decidio y despues se deshizo:
 | Tunel VPN propio con puerto entrante | contradecia el principio de borde cerrado |
 | Canal de chat para alertas | nunca llego a entregar un aviso |
 | Consola dedicada para dashboards | el aviso por mensajeria la volvio innecesaria |
-| Servicios de IA local en el laboratorio | no se usaban; se retiraron con su historial archivado |
+| Servicios de IA local en la infraestructura | no se usaban; se retiraron con su historial archivado |
 | Un servicio de credenciales autoalojado | no se usaba; su baja esta en curso |
 
 ## Como leerlo
 
-> El lab es pequeno, pero esta disenado como plataforma: segmentado, sin
+> La infraestructura es chica, pero esta disenada como plataforma: segmentado, sin
 > exposicion entrante, observable, recuperable con evidencia, y documentado con
 > sus tradeoffs, sus errores y lo que todavia falta.

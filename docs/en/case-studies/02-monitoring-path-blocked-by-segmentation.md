@@ -2,7 +2,7 @@
 
 ## Context
 
-The lab separates services and infrastructure into functional zones. That segmentation is valuable, but monitoring sometimes requires carefully justified cross-zone traffic.
+The infrastructure separates services and infrastructure into functional zones. That segmentation is valuable, but monitoring sometimes requires carefully justified cross-zone traffic.
 
 ## Symptom
 

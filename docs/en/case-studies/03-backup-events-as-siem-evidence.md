@@ -2,7 +2,7 @@
 
 ## Context
 
-Backups are operational controls, but failures should also be visible as security and resilience events. The lab treats SIEM visibility as evidence, not just a dashboard.
+Backups are operational controls, but failures should also be visible as security and resilience events. The infrastructure treats SIEM visibility as evidence, not just a dashboard.
 
 ## Symptom
 

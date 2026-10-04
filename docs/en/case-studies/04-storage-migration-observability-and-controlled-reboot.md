@@ -2,7 +2,7 @@
 
 ## Context
 
-A small production-style lab needed to recover storage capacity without breaking
+A small production infrastructure needed to recover storage capacity without breaking
 automation, backups or observability. The environment had strong dependencies
 between storage, DNS, dashboards, security services and virtual machine startup
 order.
