@@ -113,6 +113,7 @@ flowchart LR
 | [Backups That Don't Lie](https://github.com/Nicolasperaltait/backups-that-dont-lie) | backups medidos por su contenido y restauracion probada | RTO de segundos |
 | [Hypervisor as Control Plane](https://github.com/Nicolasperaltait/hypervisor-as-control-plane) | el hipervisor operado como plataforma productiva | reboot verificado, no supuesto |
 | [SecOps Governance Blueprint](https://github.com/Nicolasperaltait/secops-governance-blueprint) | SOC, SIEM, endurecimiento medido y lo que se decidio no hacer | SOC completo |
+| [Patch Ready by Six](https://github.com/Nicolasperaltait/patch-ready-by-six) | gestion de vulnerabilidades que decide que parchar y deja el script listo; una persona aprueba | 12.073 hallazgos, 9 parches |
 
 ## Otros proyectos
 
